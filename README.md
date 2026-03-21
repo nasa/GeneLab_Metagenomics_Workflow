@@ -1,6 +1,6 @@
 # GeneLab Metagenomics Sequencing Data Processing Workflow
 
-> GeneLab, part of NASA's [Open Science Data Repository (OSDR)](https://www.nasa.gov/osdr/), has wrapped each step of the [Low Biomass long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Nanopore), [Low Biomass short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Illumina), [Standard long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Nanopore) and [Standard short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Illumina) metagenomics sequencing data processing pipelines into a Nextflow workflow. This repository contains information about the workflow along with instructions for installation and usage. Exact workflow run info and pipeline version used to process specific datasets hosted on the [OSDR data repository](https://osdr.nasa.gov/bio/repo/) are provided alongside their processed data in OSDR under 'Files' -> 'GeneLab Processed Metagenomics Files' -> 'Processing Info'. 
+> GeneLab, part of NASA's [Open Science Data Repository (OSDR)](https://www.nasa.gov/osdr/), has wrapped each step of the [Low Biomass long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Nanopore), [Low Biomass short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions), [Standard long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Pipeline_GL-DPPD-7116_Versions) and [Standard short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Illumina) metagenomics sequencing data processing pipelines into a Nextflow workflow. This repository contains information about the workflow along with instructions for installation and usage. Exact workflow run info and pipeline version used to process specific datasets hosted on the [OSDR data repository](https://osdr.nasa.gov/bio/repo/) are provided alongside their processed data in OSDR under 'Files' -> 'GeneLab Processed Metagenomics Files' -> 'Processing Info'. 
 
 <br>
 
@@ -14,7 +14,7 @@
 
 ### Implementation Tools
 
-The current GeneLab metagenomics sequencing data processing pipelines, [Low biomass long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Nanopore), [Low biomass short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Illumina), [Standard long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Nanopore) and [Standard short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Illumina) are implemented as a [Nextflow](https://nextflow.io/) DSL2 workflow and utilizes [Singularity](https://docs.sylabs.io/guides/3.10/user-guide/introduction.html) containers, [Docker](https://docs.docker.com/get-started/) containers, or [conda](https://docs.conda.io/en/latest/) environments to install/run all tools. This workflow is run using the command line interface (CLI) of any unix-based system.  While knowledge of creating workflows in Nextflow is not required to run the workflow as is, [the Nextflow documentation](https://nextflow.io/docs/latest/index.html) is a useful resource for users who want to modify and/or extend this workflow.   
+The current GeneLab metagenomics sequencing data processing pipelines, [Low biomass long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7116_Versions), [Low biomass short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions), [Standard long-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Nanopore) and [Standard short-read](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Illumina) are implemented as a [Nextflow](https://nextflow.io/) DSL2 workflow and utilizes [Singularity](https://docs.sylabs.io/guides/3.10/user-guide/introduction.html) containers, [Docker](https://docs.docker.com/get-started/) containers, or [conda](https://docs.conda.io/en/latest/) environments to install/run all tools. This workflow is run using the command line interface (CLI) of any unix-based system.  While knowledge of creating workflows in Nextflow is not required to run the workflow as is, [the Nextflow documentation](https://nextflow.io/docs/latest/index.html) is a useful resource for users who want to modify and/or extend this workflow.   
 
 ### Resource Requirements <!-- omit in toc -->
 
@@ -30,39 +30,39 @@ The table below details the default maximum resource allocations for individual 
 
 ## Utilizing the Workflow
 
-1. [Install Nextflow, Singularity, and Conda](#1-install-nextflow-singularity-and-conda)  
-   - 1a. [Install Nextflow and Conda](#1a-install-nextflow-and-conda)  
-   - 1b. [Install Singularity](#1b-install-singularity)  
-
-2. [Download the Workflow Files](#2-download-the-workflow-files)  
-
-3. [Fetch Singularity Images](#3-fetch-singularity-images)  
-
-4. [Run the Workflows](#4-run-the-workflows)  
-   - 4a. [Standard Long Read Workflow](#4a-standard-long-read-workflow)  
-      - 4ai. [Approach 1: Start with pod5 or fast5 files as input](#4ai-approach-1-start-with-pod5-files-as-input)  
-      - 4aii. [Approach 2: Start with multiple FASTQ files per sample as input](#4aii-approach-2-start-with-multiple-fastq-files-per-sample-as-input)  
-      - 4aiii. [Approach 3: Start with one FASTQ file per sample as input](#4aiii-approach-3-start-with-one-fastq-file-per-sample-as-input)
-
-   - 4b. [Low Biomass Long Read Workflow](#4b-low-biomass-long-read-workflow)  
-      - 4bi. [Approach 1: Start with pod5 or fast5 files as input](#4bi-approach-1-start-with-pod5-files-as-input)  
-      - 4bii. [Approach 2: Start with multiple FASTQ files per sample as input](#4bii-approach-2-start-with-multiple-fastq-files-per-sample-as-input)  
-      - 4biii. [Approach 3: Start with one FASTQ file per sample as input](#4biii-approach-3-start-with-one-fastq-file-per-sample-as-input)
-              
-   - 4c. [Standard Short Read Workflow](#4c-standard-short-read-workflow)  
-      - 4ci. [Approach 1: Start with paired-end FASTQ files as input](#4ci-approach-1-start-with-paired-end-fastq-files-as-input)  
-      - 4cii. [Approach 2: Start with single-end FASTQ files as input](#4cii-approach-2-start-with-single-end-fastq-files-as-input)
-
-   - 4d. [Low Biomass Short Read Workflow](#4d-low-biomass-short-read-workflow)  
-      - 4di. [Approach 1: Start with paired-end FASTQ files as input](#4di-approach-1-start-with-paired-end-fastq-files-as-input)  
-      - 4dii. [Approach 2: Start with single-end FASTQ files as input](#4dii-approach-2-start-with-single-end-fastq-files-as-input)
-
-   - 4e. [Monitoring runs on seqera platforms](#4e-monitoring-runs-on-seqera-platforms)
-   - 4f. [Modify parameters and compute resources in the Nextflow config file](#4f-modify-parameters-and-compute-resources-in-the-nextflow-config-file)
-   
-5. [Workflow Outputs](#5-workflow-outputs)  
-   - 5a. [Main outputs](#5a-main-outputs)  
-   - 5b. [Resource logs](#5b-resource-logs)  
+- [GeneLab Metagenomics Sequencing Data Processing Workflow](#genelab-metagenomics-sequencing-data-processing-workflow)
+  - [General Workflow Info](#general-workflow-info)
+    - [Implementation Tools](#implementation-tools)
+  - [Utilizing the Workflow](#utilizing-the-workflow)
+    - [1. Install Nextflow, Singularity, and Conda](#1-install-nextflow-singularity-and-conda)
+      - [1a. Install Nextflow and Conda](#1a-install-nextflow-and-conda)
+      - [1b. Install Singularity](#1b-install-singularity)
+    - [2. Download the Workflow Files](#2-download-the-workflow-files)
+    - [3. Fetch Singularity Images](#3-fetch-singularity-images)
+    - [4. Run the Workflows](#4-run-the-workflows)
+      - [4a. Standard Long Read Workflow](#4a-standard-long-read-workflow)
+        - [4ai. Approach 1: Start with pod5 files as input](#4ai-approach-1-start-with-pod5-files-as-input)
+        - [4aii. Approach 2: Start with multiple FASTQ files per sample as input](#4aii-approach-2-start-with-multiple-fastq-files-per-sample-as-input)
+        - [4aiii. Approach 3: Start with one FASTQ file per sample as input](#4aiii-approach-3-start-with-one-fastq-file-per-sample-as-input)
+      - [4b. Low Biomass Long Read Workflow](#4b-low-biomass-long-read-workflow)
+        - [4bi. Approach 1: Start with pod5 files as input](#4bi-approach-1-start-with-pod5-files-as-input)
+        - [4bii. Approach 2: Start with multiple FASTQ files per sample as input](#4bii-approach-2-start-with-multiple-fastq-files-per-sample-as-input)
+        - [4biii. Approach 3: Start with one FASTQ file per sample as input](#4biii-approach-3-start-with-one-fastq-file-per-sample-as-input)
+      - [4c. Standard Short Read Workflow](#4c-standard-short-read-workflow)
+        - [4ci. Approach 1: Start with paired-end FASTQ files as input](#4ci-approach-1-start-with-paired-end-fastq-files-as-input)
+        - [4cii. Approach 2: Start with single-end FASTQ files as input](#4cii-approach-2-start-with-single-end-fastq-files-as-input)
+      - [4d. Low Biomass Short Read Workflow](#4d-low-biomass-short-read-workflow)
+        - [4di. Approach 1: Start with paired-end FASTQ files as input](#4di-approach-1-start-with-paired-end-fastq-files-as-input)
+        - [4dii. Approach 2: Start with single-end FASTQ files as input](#4dii-approach-2-start-with-single-end-fastq-files-as-input)
+      - [4e. Monitoring runs on seqera platforms](#4e-monitoring-runs-on-seqera-platforms)
+      - [4f. Modify parameters and compute resources in the Nextflow config file](#4f-modify-parameters-and-compute-resources-in-the-nextflow-config-file)
+    - [5. Workflow Outputs](#5-workflow-outputs)
+      - [5a. Main Outputs](#5a-main-outputs)
+      - [5b. Resource Logs](#5b-resource-logs)
+  - [License](#license)
+    - [3rd Party Software Licenses](#3rd-party-software-licenses)
+  - [Notices](#notices)
+    - [Disclaimers](#disclaimers)
 
 <br>
 
@@ -283,7 +283,7 @@ nextflow run main.nf -resume \
 
 #### 4c. Standard Short Read Workflow
 
-The GeneLab Metagenomics Standard Short Read workflow is designed to process data generated from short-read platforms such as [Illumina](https://www.illumina.com/) using the [GeneLab Metagenomics Standard Short Read Pipeline](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Illumina). Below are 2 different approaches for running the workflow, depending on the input files provided.
+The GeneLab Metagenomics Standard Short Read workflow is designed to process data generated from short-read platforms such as [Illumina](https://www.illumina.com/) using the [GeneLab Metagenomics Standard Short Read Pipeline](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics/Metagenomics/Pipeline_GL-DPPD-7117_Versions). Below are 2 different approaches for running the workflow, depending on the input files provided.
 
 >*NOTE: This workflow assumes that  host reads have already been removed from the datasets. If host reads have not been removed, please run this [Host reads removal workflow](https://github.com/nasa/GeneLab_Data_Processing/tree/DEV_Metagenomics_rmHR_NF_conversion/Metagenomics/Remove_host_reads/Workflow_Documentation/NF_MGRemoveHostReads) on your dataset befor running this workflow.*
 
@@ -317,7 +317,7 @@ nextflow run main.nf -resume \
 
 #### 4d. Low Biomass Short Read Workflow
 
-The GeneLab Metagenomics Low Biomass Short Read workflow is designed to process data generated from short-read platforms such as [Illumina](https://www.illumina.com/) using the [GeneLab Metagenomics Low Biomass Short Read Pipeline](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Illumina). Below are 2 different approaches for running the workflow, depending on the input files provided.
+The GeneLab Metagenomics Low Biomass Short Read workflow is designed to process data generated from short-read platforms such as [Illumina](https://www.illumina.com/) using the [GeneLab Metagenomics Low Biomass Short Read Pipeline](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions). Below are 2 different approaches for running the workflow, depending on the input files provided.
 
 
 ##### 4di. Approach 1: Start with paired-end FASTQ files as input
@@ -378,7 +378,7 @@ nextflow run main.nf -resume \
 * `--publishDir_mode` Specifies how nextflow handles output file publishing. Options can be found here https://www.nextflow.io/docs/latest/process.html#publishdir Default: link.
 * `--errorStrategy` Specifies how nextflow handles errors. Options can be found here https://www.nextflow.io/docs/latest/process.html#errorstrategy. Default: terminate.
 * `--swift_1S` Setting for trimming recommended when working with Swift 1S libraries.
-  adds `swift=t` setting to bbduk quality trimming/filtering command. For info on this, see example, https://swiftbiosci.com/wp-content/uploads/2019/03/16-0853-Tail-Trim-Final-442019.pdf.
+  adds `swift=t` setting to bbduk quality trimming/filtering command. For info on this, see example, https://www.bioscience.co.uk/userfiles/pdf/16-0853-Tail-Trim-Final-442019.pdf.
   Set to true if data was generated with Swift 1S library prep. Default: false.
 * `--multiqc_config` Path to a custom multiqc config file. Default: config/multiqc.config.
 * `--use_gtdbtk_scratch_location` Should a scratch location be used to store GTDBTK temp files? true or false. Scratch directory for gtdb-tk, if wanting to use disk space instead of RAM, can be memory intensive;
@@ -401,7 +401,7 @@ nextflow run main.nf -resume \
 **Paths to existing databases and database links.**
 * `--DB_ROOT`   FULL PATH to root directory where the databases will be downloaded if they don't exist. Relative paths such as '~/' and '../' will fail, please don't use them. Default: ../Reference_DBs/
 
-*CAT database directory strings: The strings below will be added to the end of the --database.cat_db path arguement provided below.*
+*CAT database directory strings: The strings below will be added to the end of the --database.cat_db path argument provided below.*
 * `--cat_taxonomy_dir`  Path to CAT taxonomy database directory. Default: 2021-01-07_taxonomy/.
 *  `--cat_db_sub_dir`  Path to CAT database sub directory. Default: 2021-01-07_CAT_database/.
 *  `--CAT_DB_LINK`  CAT database online download link. Default: https://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20210107.tar.gz.
@@ -495,11 +495,11 @@ Once you've downloaded the workflow template, you can modify the parameters in t
 
 * The outputs from the GeneLab Standard Long Read Metagenomics workflow are documented in the [GL-DPPD-7XXX](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Nanopore/GL-DPPD-7XXX.md) processing pipeline.
 
-* The outputs from the GeneLab Low Biomass Long Read Metagenomics workflow are documented in the [GL-DPPD-7116](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Nanopore/GL-DPPD-7116.md) processing pipeline.
+* The outputs from the GeneLab Low Biomass Long Read Metagenomics workflow are documented in the [GL-DPPD-7116](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7116_Versions/GL-DPPD-7116.md) processing pipeline.
 
-* The outputs from the GeneLab Standard Short Read Metagenomics workflow are documented in the [GL-DPPD-7XXX](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Illumina/GL-DPPD-7XXX.md) processing pipeline.
+* The outputs from the GeneLab Standard Short Read Metagenomics workflow are documented in the [GL-DPPD-7107-A](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Illumina/Pipeline_GL-DPPD-7107_Versions/GL-DPPD-7107-A.md) processing pipeline.
   
-* The outputs from the GeneLab Low Biomass Short Read Metagenomics workflow are documented in the [GL-DPPD-7117](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Illumina/GL-DPPD-7117.md) processing pipeline.
+* The outputs from the GeneLab Low Biomass Short Read Metagenomics workflow are documented in the [GL-DPPD-7117](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions/GL-DPPD-7117.md) processing pipeline.
 
 #### 5b. Resource Logs
 
@@ -523,7 +523,7 @@ The software for the GeneLab Metagenomics workflow is released under the [NASA O
 
 ### 3rd Party Software Licenses
 
-Licenses for the 3rd party open source software utilized in the GeneLab Metagenomics workflow can be found in the [3rd_Party_Licenses sub-directory](License/3rd_Party_Licenses). 
+Licenses for the 3rd party open source software utilized in the GeneLab Metagenomics workflow can be found in the [License/3rd_Party_Licenses sub-directory](License/3rd_Party_Licenses). 
 
 <br>
 
