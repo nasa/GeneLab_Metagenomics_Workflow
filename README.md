@@ -19,7 +19,8 @@ The table below details the default maximum resource allocations for individual 
 |--------------------|------------------|
 | 10                 | 500 GB           |
 
-> ***Note:*** *These per-process resource allocations are defaults. They can be adjusted by modifying `cpus` and `memory` directives in the  [default.config](config/default.config), [illumina.config](config/illumina.config) and [nanopore.config](config/nanopore.config) configuration files. For more granular information on resource allocation, see the full workflow documentation in [GeneLab_Metagenomics_Workflow_Docuemntation.md](./GeneLab_Metagenomics_Workflow_Documentation.md)*
+> [!TIP]
+> These per-process resource allocations are defaults. They can be adjusted by modifying `cpus` and `memory` directives in the  [default.config](config/default.config), [illumina.config](config/illumina.config) and [nanopore.config](config/nanopore.config) configuration files. For more granular information on resource allocation, see the full workflow documentation in [GeneLab_Metagenomics_Workflow_Documentation.md](./GeneLab_Metagenomics_Workflow_Documentation.md)
 
 <br>
 
@@ -86,15 +87,16 @@ are needed for decontamination:
 
 Nextflow can be installed either through the [Anaconda bioconda channel](https://anaconda.org/bioconda/nextflow) or as documented in the [Nextflow installation documentation](https://docs.seqera.io/nextflow/install).
 
-> **Note:** If you wish to install conda, we recommend installing a Miniforge version appropriate for your system, as documented on the [conda-forge website](https://conda-forge.org/download/), where you can find basic binaries for most systems. More detailed miniforge documentation is available in the [miniforge github repository](https://github.com/conda-forge/miniforge).
+> [!TIP]
+> If you wish to install Conda, we recommend installing a Miniforge version appropriate for your system, as documented on the [conda-forge website](https://conda-forge.org/download/), where you can find basic binaries for most systems. More detailed miniforge documentation is available in the [miniforge github repository](https://github.com/conda-forge/miniforge).
 > 
-> Once conda is installed on your system, you can install the latest version of Nextflow by running the following commands:
+> Once Conda is installed on your system, you can install the latest version of Nextflow by running the following commands:
 > 
 > ```bash
 > conda install -c bioconda nextflow
 > nextflow self-update
 > ```
-> You may also install [mamba](https://mamba.readthedocs.io/en/latest/index.html) first which is a faster implementation of conda and can be used as a drop-in replacement:
+> You may also install [Mamba](https://mamba.readthedocs.io/en/latest/index.html) first which is a faster implementation of Conda and can be used as a drop-in replacement:
 > ```bash
 > conda install -c conda-forge mamba
 > ```
@@ -107,9 +109,9 @@ Singularity is a platform that allows usage of containerized software. This enab
 
 We recommend installing Singularity on a system wide level as per the associated [documentation](https://docs.sylabs.io/guides/3.10/admin-guide/admin_quickstart.html).
 
-> ***Note:*** *Singularity is also available through the [Anaconda conda-forge channel](https://anaconda.org/conda-forge/singularity).*
-
-> ***Note:*** *Alternatively, Docker can be used in place of Singularity. To get started with Docker, see the [Docker CE installation documentation](https://docs.docker.com/engine/install/).*
+> [!TIP]
+> - Singularity is also available through the [Anaconda conda-forge channel](https://anaconda.org/conda-forge/singularity). 
+> - Alternatively, Docker can be used in place of Singularity. To get started with Docker, see the [Docker CE installation documentation](https://docs.docker.com/engine/install/).
 
 <br>
 
@@ -136,7 +138,8 @@ Although Nextflow can fetch Singularity images from a url, doing so may cause is
 
 To avoid this issue, run the following command to fetch the Singularity images prior to running the GeneLab NF_MetagenomeSeq workflow:
 
-> ***Note:*** *This command should be run from within the `NF_MetagenomeSeq_1.0.0-beta` directory that was downloaded in [step 2](#2-download-the-workflow-files) above. Depending on your network speed, fetching the images will take ~20 minutes. Approximately 4GB of RAM is needed to download and build the Singularity images.*
+> [!NOTE]
+> *This command should be run from within the `NF_MetagenomeSeq_1.0.0-beta` directory that was downloaded in [step 2](#2-download-the-workflow-files) above. Depending on your network speed, fetching the images will take ~20 minutes. Approximately 4GB of RAM is needed to download and build the Singularity images.*
 
 ```bash
 bash ./bin/prepull_singularity.sh config/*.config
@@ -156,28 +159,26 @@ export NXF_SINGULARITY_CACHEDIR=$(pwd)/singularity
 
 <br>
 
-For options and detailed help on how to run the workflow, run the following command:
+For options and detailed help on how to run the workflow directly on the command-line, run the following command:
 
 ```bash
 nextflow run main.nf --help
 ```
 
-More detailed documentation can also be found in [GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md](./GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md). [GeneLab_NF_MetagenomeSeq_Workflow_Quick_Reference.md](./GeneLab_NF_MetagenomeSeq_Workflow_Quick_Reference.md)
-provides a quick reference for the most used <WHAT?>
+There are also two additional documentation files available:
+- A quick reference with the most frequently needed information: [GeneLab_NF_MetagenomeSeq_Workflow_Quick_Reference.md](./GeneLab_NF_MetagenomeSeq_Workflow_Quick_Reference.md) 
+- More detailed documentation of each option: [GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md](./GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md). 
+
 
 <br>
 
-> ***NOTES:***
-> 
-> *- All commands in this section assume that the workflow will be run from within the `NF_MetagenomeSeq_1.0.0-beta` directory that was downloaded in [step 2](#2-download-the-workflow-files) above. They may also be run from a different location by providing full paths to the main.nf, and nextflow.config workflow files in the `NF_MetagenomeSeq_1.0.0-beta` directory.*  
-> 
-> *- Nextflow commands use both single hyphen arguments (e.g. -help) that denote general Nextflow arguments and double hyphen arguments (e.g. --input_file) that denote workflow specific parameters.  Take care to use the proper number of hyphens for each argument.*  
->
-> <BR>
-> 
-> ***Human Read Removal:*** 
-> 
-> - The short-read workflows assume that human reads have already been removed from the datasets. If human reads have not been removed from short-read data, please run the [Human reads removal workflow](https://github.com/nasa/GeneLab_Data_Processing/tree/master/Metagenomics/Remove_human_reads_from_raw_data/Workflow_Documentation) on your dataset before running this workflow.
+> [!NOTE]
+> - All commands in this section assume that the workflow will be run from within the `NF_MetagenomeSeq_1.0.0-beta` directory that was downloaded in [step 2](#2-download-the-workflow-files) above. They may also be run from a different location by providing full paths to the main.nf, and nextflow.config workflow files in the `NF_MetagenomeSeq_1.0.0-beta` directory.  
+> - Nextflow commands use both single hyphen arguments (e.g. -help) that denote general Nextflow arguments and double hyphen arguments (e.g. --input_file) that denote workflow specific parameters.  Take care to use the proper number of hyphens for each argument.  
+
+> [!IMPORTANT]
+> ***Human Read Removal:***  
+> - The short-read workflows assume that human reads have already been removed from the datasets. If human reads have not been removed from short-read data, please run the [Human reads removal workflow](https://github.com/nasa/GeneLab_Data_Processing/tree/master/Metagenomics/Remove_human_reads_from_raw_data/Workflow_Documentation) on your dataset before running this workflow.  
 > - Long-read workflows incorporate human read removal after the filter/trim steps to account for the lower read quality inherent in long read data. Do not run separate human read removal on the raw data prior running the long-read workflows.
 
 <br>
@@ -248,22 +249,25 @@ nextflow run main.nf -resume \
 
 **Required Parameters For All Short Read Approaches:**
 
-* `-resume` - Resumes workflow execution using previously cached results
 * `-profile` – Specifies the configuration [profile](config/profiles.config) to load (multiple options can be provided as a comma-separated list)
    * Software environment profile options (choose one):
       * `singularity` - instructs Nextflow to use Singularity container environments
       * `docker` - instructs Nextflow to use Docker container environments
-      * `conda` - instructs Nextflow to use conda environments via the conda package manager
-        > *Note: By default, Nextflow will create environments at runtime using the yaml files in the [envs](envs/) folder. You can change this behavior by using the `--conda_*` workflow parameters or by editing the [default](config/default.config) and [illumina](config/illumina.config) config files to specify a centralized conda environments directory via the `conda.cacheDir` parameter.*
-      * `mamba` - instructs Nextflow to use conda environments via the mamba package manager 
+      * `conda` - instructs Nextflow to use Conda environments via the Conda package manager
+      * `mamba` - instructs Nextflow to use Conda environments via the Mamba package manager 
+        > *Note: By default, Nextflow will create Conda and Mamba  environments at runtime using the yaml files in the [envs](envs/) folder. You can change this behavior by using the `--conda_*` workflow parameters to adjust individual environments or by editing the [profiles](config/profiles.config) config file to specify the path where Conda or Mamba environments are stored using the `conda.cacheDir` parameter.*
    * Other option (can be combined with the software environment option above using a comma, e.g. `-profile slurm,singularity`):
       * `slurm` - instructs Nextflow to use the [Slurm cluster management and job scheduling system](https://slurm.schedmd.com/overview.html) to schedule and run the jobs on a Slurm HPC cluster
 * `main.nf` - Instructs Nextflow to run the Genelab Metagenomics workflow. If running in a directory other than `NF_MetagenomeSeq_1.0.0-beta`, replace with the full path to the main.nf workflow file.
 * `--sample_type` - Specifies the type of sample to be analyzed. One of "standard" or "low_biomass" for standard and low biomass sample types, respectively. 
-* `--errorStrategy "ignore"` - Instructs Nextflow to continue processing the dataset even if an error is encountered. It is recommended to set this to "ignore" because of very long running processes that if when terminated may require a lot of time and disk space. Set to "terminate" if you'd want to terminate the workflow when an error is encountered.
+terminated may require a lot of time and disk space. Set to "terminate" if you'd want to terminate the workflow when an error is encountered.
 * `--technology "illumina"` - Specifies the technology type used to generate the sequencing data.
 * `--input_file *.csv` - Specifies the input csv file containing required metadata about the samples including paths to the input file(s) for each sample.
-  * > *Note: These input files require specific formatting to be interpreted correctly. Please see the [runsheet documentation](examples/runsheet) in this repository for examples on how to format this file type for each approach.
+  * > *Note: These input files require specific formatting to be interpreted correctly. Please see the [runsheet documentation](examples/runsheet) in this repository for examples on how to format this file type for each approach.*
+
+**Optional Parameters Recommended for All Short Read Approaches and Used in the Examples Above:**
+* `-resume` - Resumes workflow execution using previously cached results. Not required on first run, but including it just results in a warning and proceeds with normal execution.
+* `--errorStrategy "ignore"` - Instructs Nextflow to continue processing the dataset if an error is encountered in any step. The Nextflow default is 'terminate', which interrupts all running processes at the time of error including those that would not have failed otherwise. The default behavior can be expensive in time and disk space used.
 
 <br>
 
@@ -364,107 +368,116 @@ nextflow run main.nf -resume \
 
 **Required Parameters For All Long Read Approaches:**
 
-* `-resume` - Resumes  workflow execution using previously cached results
 * `-profile` – Specifies the configuration [profile](config/profiles.config) to load (multiple options can be provided as a comma-separated list)
    * Software environment profile options (choose one):
       * `singularity` - instructs Nextflow to use Singularity container environments
       * `docker` - instructs Nextflow to use Docker container environments
-      * `conda` - instructs Nextflow to use conda environments via the conda package manager
-        > *Note: By default, Nextflow will create environments at runtime using the yaml files in the [envs](envs/) folder. You can change this behavior by using the `--conda_*` workflow parameters or by editing the [default](config/default.config) and [nanopore](config/nanopore.config) config files to specify a centralized conda environments directory via the `conda.cacheDir` parameter.*
-      * `mamba` - instructs Nextflow to use conda environments via the mamba package manager 
+      * `conda` - instructs Nextflow to use Conda environments via the Conda package manager
+        > *Note: By default, Nextflow will create environments at runtime using the yaml files in the [envs](envs/) folder. You can change this behavior by using the `--conda_*` workflow parameters or by editing the [default](config/default.config) and [nanopore](config/nanopore.config) config files to specify a centralized Conda environments directory via the `conda.cacheDir` parameter.*
+      * `mamba` - instructs Nextflow to use Conda environments via the Mamba package manager 
    * Other option (can be combined with the software environment option above using a comma, e.g. `-profile slurm,singularity`):
       * `slurm` - instructs Nextflow to use the [Slurm cluster management and job scheduling system](https://slurm.schedmd.com/overview.html) to schedule and run the jobs on a Slurm HPC cluster
 * `main.nf` - Instructs Nextflow to run the Genelab metagenomics workflow. If running in a directory other than `NF_MetagenomeSeq_1.0.0-beta`, replace with the full path to the main.nf workflow file.
 * `--sample_type` - Specifies the type of sample to be analyzed. One of "standard" or "low_biomass" for standard or low biomass sample type, respectively. 
 * `--input_dir` - Specifies the path to a directory containing pod5 files generated after nanopore sequencing
 * `--kit_name` - Specifies the Oxford nanopore sequencing kit used 
-* `--errorStrategy "ignore"` - Instructs Nextflow to continue processing the dataset even if an error is encountered. It is recommended to set this to "ignore" because of very long running processes that if when terminated may require a lot of time and disk space. Set to "terminate" if you'd want to terminate the workflow when an error is encountered.
 * `--input_file *.csv` - Specifies the input csv file containing required metadata about the samples including barcode information and paths to the input file(s) for each sample.
 * > *Note: These input files require specific formatting to be interpreted correctly. Please see the [runsheet documentation](examples/runsheet) in this repository for examples on how to format this file type for each approach.* 
 * `--input_type` - The type of input data/sequences in the `--input_file` when running the nanopore workflow. Values are one of "single", "multiple", or "directory" for single fastq files per sample, multiple fastq files per sample, or a Pod5 directory, respectively. 
 * `--technology "nanopore"` - Specifies the technology type used to generate the sequencing data.
 
+**Optional Parameters Recommended for All Short Read Approaches and Used in the Examples Above:**
+* `-resume` - Resumes workflow execution using previously cached results. Not required on first run, but including it just results in a warning and proceeds with normal execution.
+* `--errorStrategy "ignore"` - Instructs Nextflow to continue processing the dataset if an error is encountered in any step. The Nextflow default is 'terminate', which interrupts all running processes at the time of error including those that would not have failed otherwise. The default behavior can be expensive in time and disk space used.
+
 <br>
 
 **Additional [Optional] Parameters For All Approaches For Both Long- and Short-Read**
-> **Note:** *See `nextflow run -h` and [Nextflow's CLI run command documentation](https://docs.seqera.io/nextflow/cli#run) for more options and details on how to run Nextflow.*
-* `--assay_suffix ` – Specifies the suffix to add to each output file. Defalut: 
-* `--workflow` Specifies the workflow to be run. Options are one of ["read-based", "assembly-based", "both"]. Default: both 
-* `--publishDir_mode` Specifies how Nextflow handles output file publishing. Options are defined here: https://docs.seqera.io/nextflow/reference/process#mode Default: link 
-* `--errorStrategy` Specifies how Nextflow handles errors. Options are defined here: https://docs.seqera.io/nextflow/reference/process#errorstrategy. Default: terminate 
-* `--multiqc_config` Path to a custom multiqc config file. Default: config/multiqc.config 
-* `--use_gtdbtk_scratch_location` Should a scratch location be used to store GTDBTK temp files? true or false. Scratch directory for gtdb-tk, if wanting to use disk space instead of RAM, can be memory intensive;
-  see https://ecogenomics.github.io/GTDBTk/faq.html#gtdb-tk-reaches-the-memory-limit-pplacer-crashes leave empty if wanting to use memory, the default, put in quotes the path to a directory that
-  already exists if wanting to use disk space. Default: false 
+> ***Note:*** *See `nextflow run -h` and [Nextflow's CLI run command documentation](https://docs.seqera.io/nextflow/cli#run) for more options and details on how to run Nextflow.*
+* `--assay_suffix ` – Specifies the suffix to add to each output file. Standard GeneLab suffixes are: "_GLmetagenomics", "_GLlbsMetag", "_GLlblMetag", Default: "" 
+* `--workflow` – Specifies the workflow to be run. Options are one of ["read-based", "assembly-based", "both"]. Default: both 
+* `--publishDir_mode` – Specifies how Nextflow handles output file publishing. Options are defined here: https://docs.seqera.io/nextflow/reference/process#mode Default: link 
+* `--errorStrategy` – Specifies how Nextflow should handle errors. Options are defined here: https://docs.seqera.io/nextflow/reference/process#errorstrategy. Default: terminate 
+* `--multiqc_config` – Path to a custom multiqc config file. Default: config/multiqc.config 
+* `--use_gtdbtk_scratch_location` – Specifies whether or not to use a scratch location on disk rather than memory for running GTDB-Tk. Implements the troubleshooting suggestion in the GTDB-Tk FAQ: https://ecogenomics.github.io/GTDBTk/faq.html#gtdb-tk-reaches-the-memory-limit-pplacer-crashes. Options are: [true, false]. Default: false
 
 **MAG parameters:** MAG filtering cutoffs based on checkm quality assessments (in percent); see https://github.com/Ecogenomics/CheckM/wiki/Reported-Statistics.
-* `--min_est_comp` Minimum estimated completion. Default: 90 
-* `--max_est_redund` Maximum estimated redundancy. Default: 10 
-* `--max_est_strain_het` Maximum estimated strain heterogeneity. Default: 50 
-* `--reduced_tree` reduced_tree option for checkm, limits the RAM usage to 16GB; https://github.com/Ecogenomics/CheckM/wiki/Genome-Quality-Commands#tree.
+* `--min_est_comp` – Minimum estimated completion. Default: 90 
+* `--max_est_redund` – Maximum estimated redundancy. Default: 10 
+* `--max_est_strain_het` – Maximum estimated strain heterogeneity. Default: 50 
+* `--reduced_tree` – reduced_tree option for checkm, limits the RAM usage to 16GB; https://github.com/Ecogenomics/CheckM/wiki/Genome-Quality-Commands#tree.
   'True' for yes, anything else will be considered 'False' and the default full tree will be used. Default: 'True' 
-* `--max_mem` Maximum memory allowed, passed to megahit assembler. Can be set either by proportion of available on system, e.g. 0.5, or by absolute value in bytes, e.g. 100e9 would be 100 GB. Default: 100e9 
-* `--pileup_mem` Specifies the memory used by bbmap's pileup.sh (within the GET_COV_AND_DET process) script for calculating contig coverage and depth. This value is passed as the Java -Xmx parameter, 20g means 20 gigabytes of RAM, 20m means 20 megabytes. 5g should be sufficient for most assemblies, but if that fails, this may need to be increased. Default: '5g' 
-* `--block_size` Block size variable for CAT/diamond, lower value means less RAM usage; see https://github.com/bbuchfink/diamond/wiki/3.-Command-line-options#memory--performance-options. Default: 4 
+* `--max_mem` – Maximum memory allowed, passed to megahit assembler. Can be set either by proportion of available on system, e.g. 0.5, or by absolute value in bytes, e.g. 100e9 would be 100 GB. Default: 100e9 
+* `--pileup_mem` – Specifies the memory used by bbmap's pileup.sh (within the GET_COV_AND_DET process) script for calculating contig coverage and depth. This value is passed as the Java -Xmx parameter, 20g means 20 gigabytes of RAM, 20m means 20 megabytes. 5g should be sufficient for most assemblies, but if that fails, this may need to be increased. Default: '5g' 
+* `--block_size` – Block size variable for CAT/diamond, lower value means less RAM usage; see https://github.com/bbuchfink/diamond/wiki/3.-Command-line-options#memory--performance-options. Default: 4 
 
 **Paths to existing databases and database links.**
-* `--DB_ROOT`   FULL PATH to root directory where the databases will be downloaded if they don't exist. Relative paths such as '~/' and '../' will fail, please don't use them. Default: ../Reference_DBs/ 
+> [!CAUTION]
+> Relying on database download and per-run temporary storage can be resource intensive. If running multiple jobs, it is 
+> advisable to download databases asynchronously use the following parameters to specify their locations.
 
-*CAT database directory strings: The strings below will be added to the end of the --database.cat_db path argument provided below.*
-* `--cat_taxonomy_dir`  Path to CAT taxonomy database directory. Default: 2021-01-07_taxonomy/ 
-*  `--cat_db_sub_dir`  Path to CAT database sub directory. Default: 2021-01-07_CAT_database/ 
-*  `--CAT_DB_LINK`  CAT database online download link. Default: https://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20210107.tar.gz 
+* `--DB_ROOT` – FULL PATH to root directory where the databases will be downloaded if they don't exist. Relative paths such as '~/' and '../' will fail, please don't use them. Default location: /path/to/launchDirParent/Reference_DBs 
 
-*CAT database*
-* `--cat_db` Path to CAT database. Example, /path/to/Reference_DBs/CAT_prepare_20210107/. Default: null 
+*CAT database location:*
+* `--cat_db` – Path to CAT databases. Example, /path/to/Reference_DBs/CAT_prepare_20210107/. Default: null 
 
-*Humann database:*
-* `--metaphlan_index` Metaphlan bowtie2 database index name from here: http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/bowtie2_indexes/. Default: mpa_vJun23_CHOCOPhlAnSGB_202307 
-* `--metaphlan_db_dir` Path to metaphlan database. Example, /path/to/Reference_DBs/metaphlan4-db/. Default: null 
-* `--chocophlan_dir` Path to Humann's chocophlan nucleotide database. Example, /path/to/Reference_DBs/humann3-db/chocophlan/. Default: null 
-* `--uniref_dir` Path to Humann's Uniref protein database. Example, /path/to/Reference_DBs/humann3-db/uniref/. Default: null 
-* `--utilities_dir` Path to Humann's utilities database. Example, /path/to/Reference_DBs/humann3-db/utility_mapping/.  Default: null 
+*CAT database directory names: The strings below will be added to the end of the --database.cat_db path argument provided above.*
+* `--cat_taxonomy_dir` – Path to CAT taxonomy database directory. Default: 2021-01-07_taxonomy/ 
+* `--cat_db_sub_dir` – Path to CAT database sub directory. Default: 2021-01-07_CAT_database/ 
+* `--CAT_DB_LINK` – CAT database online download link. Default: https://tbb.bio.uu.nl/bastiaan/CAT_prepare/CAT_prepare_20210107.tar.gz 
 
-*GTDBTK database:*
-* `--GTDBTK_LINK` GTDBTK database online download link. Default: https://data.gtdb.ecogenomic.org/releases/release220/220.0/auxillary_files/gtdbtk_package/full_package/gtdbtk_r220_data.tar.gz 
-* `--gtdbtk_db_dir` Path to GTDBTK database. Example, /path/Reference_DBs/GTDB-tk-ref-db/. Default: null 
+*HUMAnN database:*
+* `--metaphlan_db_dir` – Path to MetaPhlAn database. Example, /path/to/Reference_DBs/metaphlan4-db/. Default: null 
+* `--metaphlan_index` – MetaPhlAn bowtie2 database index name from here: http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/bowtie2_indexes/. Default: mpa_vJun23_CHOCOPhlAnSGB_202307 
+* `--chocophlan_dir` – Path to HUMAnN's chocophlan nucleotide database. Example, /path/to/Reference_DBs/humann3-db/chocophlan/. Default: null 
+* `--uniref_dir` - Path to HUMAnN's Uniref protein database. Example, /path/to/Reference_DBs/humann3-db/uniref/. Default: null 
+* `--utilities_dir` - Path to HUMAnN's utilities database. Example, /path/to/Reference_DBs/humann3-db/utility_mapping/.  Default: null 
 
-*kofam scan database database:*
-* `--ko_db_dir`  Path to kofam scan database. Example, /path/to/Reference_DBs/kofamscan_db/. Default: null 
+*GTDB-Tk database:*
+* `--GTDBTK_LINK` - GTDB-Tk database online download link. Default: https://data.gtdb.ecogenomic.org/releases/release220/220.0/auxillary_files/gtdbtk_package/full_package/gtdbtk_r220_data.tar.gz 
+* `--gtdbtk_db_dir` - Path to GTDB-Tk database. Example, /path/Reference_DBs/GTDB-tk-ref-db/. Default: null 
 
-**Paths to existing conda environments** to use, otherwise, new ones will be created using the yaml files in envs/ directory. Search the specified directory for the exact packages required in an environment.
-* `--conda_bbmap` Path to a conda environment containing bbmap. Default: null 
-* `--conda_bit`  Path to a conda environment with bit installed. Default: null 
-* `--conda_bowtie2` Path to a conda environment with bowtie2 installed. Default: null 
-* `--conda_cat` Path to a conda environment containing CAT (Contig annotation tool). Default: null 
-* `--conda_checkm` Path to a conda environment with checkm installed. Default: null 
-* `--conda_dorado` Path to a conda environment with dorado installed. Default: null 
-* `--conda_fastp` Path to a conda environment with fastp installed. Default: null  
-* `--conda_fastqc` Path to a conda environment containing fastqc. Default: null 
-* `--conda_filtlong` Path to a conda environment with filtlong installed. Default: null 
-* `--conda_flye` Path to a conda environment with flye installed. Default: null 
-* `--conda_genelab` Path to a conda environment with genelab-utils installed. Default: null 
-* `--conda_gtdbtk` Path to a conda environment containing gtdbtk. Default: null 
-* `--conda_humann3` Path to a conda environment with humann3 installed. Default: null 
-* `--conda_kaiju` Path to a conda environment with kaiju installed. Default: null 
-* `--conda_kegg_decoder` Path to a conda environment with kegg_decoder installed. Default: null 
-* `--conda_kofamscan` Path to a conda environment containing KOFAM SCAN. Default: null 
-* `--conda_kraken2` Path to a conda environment with kraken2 installed. Default: null  
-* `--conda_krakentools` Path to a conda environment with krakentools installed. Default: null 
-* `--conda_krona` Path to a conda environment with krona installed. Default: null 
-* `--conda_medaka` Path to a conda environment with medaka installed. Default: null 
-* `--conda_megahit`  Path to a conda environment containing megahit. Default: null 
-* `--conda_metabat` Path to a conda environment containing metabat. Default: null 
-* `--conda_minimap2` Path to a conda environment with minimap2 installed. Default: null 
-* `--conda_multiqc` Path to a conda environment containing multiqc. Default: null 
-* `--conda_nanoplot` Path to a conda environment with nanoplot installed. Default: null 
-* `--conda_pavian` Path to a conda environment with R package pavian installed. Default: null 
-* `--conda_porechop` Path to a conda environment with porechop installed. Default: null 
-* `--conda_prodigal` Path to a conda environment with prodigal installed. Default: null 
-* `--conda_rvis` Path to a conda environment with r visualization packages (tidyverse, pheatmap, htmlwidgets etc.) installed. Default: null 
-* `--conda_samtools` Path to a conda environment with samtools installed. Default: null 
-* `--conda_spades` Path to a conda environment with spades assembler installed. Default: null 
-* `--conda_zip` Path to a conda environment containing zip. Default: null 
+*KOFamScan database:*
+* `--ko_db_dir` - Path to KOFamScan database. Example, /path/to/Reference_DBs/kofamscan_db/. Default: null 
+
+**Paths to existing Conda environments.** 
+> [!NOTE]
+> By default, new conda environments are created at runtime within the Nextflow workdir or in the conda.cacheDir specified 
+> in the [profiles](config/profiles.config) config file. These parameters allow specification of pre-existing conda 
+> environments in any location. Before using a pre-existing environment, ensure that the correct tools are installed prior 
+> to executing the workflow.
+* `--conda_bbmap` - Path to a Conda environment containing bbmap. Default: null 
+* `--conda_bit` - Path to a Conda environment with bit installed. Default: null 
+* `--conda_bowtie2` - Path to a Conda environment with bowtie2 installed. Default: null 
+* `--conda_cat` - Path to a Conda environment containing CAT (Contig annotation tool). Default: null 
+* `--conda_checkm` - Path to a Conda environment with CheckM installed. Default: null 
+* `--conda_dorado` - Path to a Conda environment with Dorado installed. Default: null 
+* `--conda_fastp` - Path to a Conda environment with fastp installed. Default: null  
+* `--conda_fastqc` - Path to a Conda environment containing FastQC. Default: null 
+* `--conda_filtlong` - Path to a Conda environment with Filtlong installed. Default: null 
+* `--conda_flye` - Path to a Conda environment with Flye installed. Default: null 
+* `--conda_genelab` - Path to a Conda environment with genelab-utils installed. Default: null 
+* `--conda_gtdbtk` - Path to a Conda environment containing GTDB-Tk. Default: null 
+* `--conda_humann3` - Path to a Conda environment with HUMAnN3 installed. Default: null 
+* `--conda_kaiju` - Path to a Conda environment with Kaiju installed. Default: null 
+* `--conda_kegg_decoder` - Path to a Conda environment with KEGG-Decoder installed. Default: null 
+* `--conda_kofamscan` - Path to a Conda environment containing KOFamScan. Default: null 
+* `--conda_kraken2` - Path to a Conda environment with Kraken2 installed. Default: null  
+* `--conda_krakentools` - Path to a Conda environment with KrakenTools installed. Default: null 
+* `--conda_krona` - Path to a Conda environment with Krona installed. Default: null 
+* `--conda_medaka` - Path to a Conda environment with Medaka installed. Default: null 
+* `--conda_megahit`  Path to a Conda environment containing megahit. Default: null 
+* `--conda_metabat` - Path to a Conda environment containing metabat. Default: null 
+* `--conda_minimap2` - Path to a Conda environment with Minimap2 installed. Default: null 
+* `--conda_multiqc` - Path to a Conda environment containing MultiQC. Default: null 
+* `--conda_nanoplot` - Path to a Conda environment with NanoPlot installed. Default: null 
+* `--conda_pavian` - Path to a Conda environment with R package pavian installed. Default: null 
+* `--conda_porechop` - Path to a Conda environment with Porechop installed. Default: null 
+* `--conda_prodigal` - Path to a Conda environment with Prodigal installed. Default: null 
+* `--conda_rvis` - Path to a Conda environment with r visualization packages (tidyverse, pheatmap, htmlwidgets etc.) installed. Default: null 
+* `--conda_samtools` - Path to a Conda environment with samtools installed. Default: null 
+* `--conda_spades` - Path to a Conda environment with SPAdes installed. Default: null 
+* `--conda_zip` - Path to a Conda environment containing zip. Default: null 
 
 <br>
 
@@ -487,8 +500,10 @@ nextflow run main.nf -resume \
     --technology "nanopore"
 ```
 
-> ***Note:** *The helper scripts [launch.sh](launch.sh) and [launch.slurm](launch.slurm) can be used to launch the workflow and to submit your run to seqera platform for workflow monitoring. Please see the scripts on how to run them after setting the required paths, parameters, and variables.* 
-<br>
+> [!TIP]
+> The helper scripts [launch.sh](launch.sh) and [launch.slurm](launch.slurm) can be used to launch the workflow and to submit 
+> your run to seqera platform for workflow monitoring. Please see the scripts on how to modify and run them after setting the 
+> required paths, parameters, and variables.
 
 #### 4f. Modify parameters and compute resources in the Nextflow config file
 
