@@ -318,7 +318,11 @@ workflow assembly_based {
 
         RENAME_HEADERS.out.version | mix(software_versions_ch) | set{software_versions_ch}
         SUMMARIZE_ASSEMBLIES.out.version | mix(software_versions_ch) | set{software_versions_ch}
-        SAM_TO_BAM.out.version | mix(software_versions_ch) | set{software_versions_ch}
+        if(params.technology == "illumina"){
+            SAM_TO_BAM.out.version | mix(software_versions_ch) | set{software_versions_ch}
+        } else {
+            SAMTOOLS_SORT.out.version | mix(software_versions_ch) | set{software_versions_ch}
+        }
         CALL_GENES.out.version | mix(software_versions_ch) | set{software_versions_ch}
         REMOVE_LINEWRAPS.out.version | mix(software_versions_ch) | set{software_versions_ch}
         KO_ANNOTATION.out.version | mix(software_versions_ch) | set{software_versions_ch}
