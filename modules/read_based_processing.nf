@@ -563,7 +563,6 @@ workflow read_based {
         KRAKEN2KRONA(KRAKEN_CLASSIFY.out.report)
         // Unfiltered
         unfilt_kraken_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'kraken2_unfiltered_species'])
         KRAKEN_UNFILTERED_BARPLOT(unfilt_kraken_barplot_meta, KRAKEN2TABLE.out.table, metadata)
@@ -572,7 +571,6 @@ workflow read_based {
                             output_file: "kraken2_filtered_species_table${params.assay_suffix}.tsv"])
         KRAKEN_FILTER_RARE(filt_kraken_meta, KRAKEN2TABLE.out.table)
         filt_kraken_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'kraken2_filtered_species'])
         KRAKEN_FILTERED_BARPLOT(filt_kraken_barplot_meta, KRAKEN_FILTER_RARE.out.table, metadata)
@@ -596,7 +594,6 @@ workflow read_based {
         // Unfiltered
         KAIJU2SPECIES_TABLE(KAIJU2TABLE.out.table)
         unfilt_kaiju_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'kaiju_unfiltered_species'])
         KAIJU_UNFILTERED_BARPLOT(unfilt_kaiju_barplot_meta, KAIJU2SPECIES_TABLE.out.table, metadata)
@@ -605,7 +602,6 @@ workflow read_based {
                             output_file: "kaiju_filtered_species_table${params.assay_suffix}.tsv"])
         KAIJU_FILTER_RARE(filt_kaiju_meta, KAIJU2SPECIES_TABLE.out.table)
         filt_kaiju_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'kaiju_filtered_species'])
         KAIJU_FILTERED_BARPLOT(filt_kaiju_barplot_meta, KAIJU_FILTER_RARE.out.table, metadata)
@@ -702,7 +698,6 @@ workflow read_based {
         // Create raw table
         METAPHLAN2COUNT(taxonomy_ch, reads_per_sample)
         unfilt_metaphlan_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'metaphlan_unfiltered_species'])
         METAPHLAN_UNFILTERED_BARPLOT(unfilt_metaphlan_barplot_meta, METAPHLAN2COUNT.out.table, metadata)
@@ -711,7 +706,6 @@ workflow read_based {
                             output_file: "metaphlan_filtered_species_table${params.assay_suffix}.tsv"])
         METAPHLAN_FILTER_RARE(filt_metaphlan_meta, METAPHLAN2COUNT.out.table)
         filt_metaphlan_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'metaphlan_filtered_species'])
         METAPHLAN_FILTERED_BARPLOT(filt_metaphlan_barplot_meta, METAPHLAN_FILTER_RARE.out.table, metadata)
@@ -724,7 +718,6 @@ workflow read_based {
                                    ntc_name: 'true'])
             METAPHLAN_DECONTAM(decontam_metaphlan_meta, metadata, METAPHLAN_FILTER_RARE.out.table)
             decontam_metaphlan_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'metaphlan_decontam_species'])
             METAPHLAN_DECONTAM_BARPLOT(decontam_metaphlan_barplot_meta, METAPHLAN_DECONTAM.out.table, metadata)
@@ -738,13 +731,12 @@ workflow read_based {
         if(params.sample_type == "low_biomass"){
 
         // Kraken2
-        decontam_kraken_meta = channel.of([feature: 'Species', samples: 'sample_id',
+        decontam_kraken_meta = channel.of([feature: 'species', samples: 'sample_id',
                                    prevalence: 'NTC', frequency: 'concentration',
                                    decontam_threshold: params.decontam_threshold, method: 'kraken2',
                                    ntc_name: 'true'])
         KRAKEN_DECONTAM(decontam_kraken_meta, metadata, KRAKEN_FILTER_RARE.out.table)
         decontam_kraken_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'kraken2_decontam_species'])
         KRAKEN_DECONTAM_BARPLOT(decontam_kraken_barplot_meta, KRAKEN_DECONTAM.out.table, metadata)
@@ -757,7 +749,6 @@ workflow read_based {
                                    ntc_name: 'true'])
         KAIJU_DECONTAM(decontam_kaiju_meta, metadata, KAIJU_FILTER_RARE.out.table)
         decontam_kaiju_barplot_meta = channel.of([group: "group",
-                               feature: 'Species',
                                samples: 'sample_id',
                                prefix:  'kaiju_decontam_species'])
         KAIJU_DECONTAM_BARPLOT(decontam_kaiju_barplot_meta, KAIJU_DECONTAM.out.table, metadata)

@@ -12,12 +12,13 @@ include { SETUP_CAT_DB; SETUP_KOFAMSCAN_DB; SETUP_GTDBTK_DB;
 
 // short-read specific modules
 include { ASSEMBLE } from "./assembly.nf"
-include { MAPPING as SHORT_MAPPING; SAM_TO_BAM } from "./read_mapping.nf"
+include { MAPPING as SHORT_MAPPING} from "./read_mapping.nf"
 
 // Long read specific modules
 include { FLYE ; POLISH_ASSEMBLY } from "./assembly.nf"
 include { LONG_MAPPING } from "./long_read_mapping.nf"
-include { SAMTOOLS_SORT } from "./samtools.nf"
+
+include {SAM_TO_BAM} from "./read_mapping.nf"
 
 include { RENAME_HEADERS; SUMMARIZE_ASSEMBLIES } from "./assembly.nf"
 include { CALL_GENES; REMOVE_LINEWRAPS } from "./assembly_annotation.nf"
@@ -108,9 +109,9 @@ workflow assembly_based {
             read_mapping_ch = SAM_TO_BAM.out.bam
         }else{
             LONG_MAPPING(assembly_ch.join(filtered_ch))
-            LONG_MAPPING.out.sam | SAMTOOLS_SORT
+            LONG_MAPPING.out.sam | SAM_TO_BAM
             LONG_MAPPING.out.version | mix(software_versions_ch) | set{software_versions_ch}
-            read_mapping_ch = SAMTOOLS_SORT.out.bam
+            read_mapping_ch = SAM_TO_BAM.out.bam
         }
 
         // Annotate assembly
@@ -318,11 +319,7 @@ workflow assembly_based {
 
         RENAME_HEADERS.out.version | mix(software_versions_ch) | set{software_versions_ch}
         SUMMARIZE_ASSEMBLIES.out.version | mix(software_versions_ch) | set{software_versions_ch}
-        if(params.technology == "illumina"){
-            SAM_TO_BAM.out.version | mix(software_versions_ch) | set{software_versions_ch}
-        } else {
-            SAMTOOLS_SORT.out.version | mix(software_versions_ch) | set{software_versions_ch}
-        }
+        SAM_TO_BAM.out.version | mix(software_versions_ch) | set{software_versions_ch}
         CALL_GENES.out.version | mix(software_versions_ch) | set{software_versions_ch}
         REMOVE_LINEWRAPS.out.version | mix(software_versions_ch) | set{software_versions_ch}
         KO_ANNOTATION.out.version | mix(software_versions_ch) | set{software_versions_ch}

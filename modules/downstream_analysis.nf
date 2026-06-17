@@ -532,7 +532,6 @@ process BARPLOT {
                   --metadata-table '${metadata}' \\
                   --feature-table '${feature_table}' \\
                   --group-column '${meta.group}' \\
-                  --feature-column '${meta.feature}' \\
                   --samples-column '${meta.samples}'  \\
                   --output-prefix  '${meta.prefix}' \\
                   --assay-suffix '${params.assay_suffix}'

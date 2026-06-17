@@ -83,7 +83,8 @@ option_list <- list(
               metavar = ""),
 
   make_option(c("-a", "--assay-suffix"), type = "character", default = "_GLMetagenomics",
-              help = "Genelab assay suffix.", metavar = "GLMetagenomics"),
+              help = "Genelab assay suffix or empty string. One of ['_GLMetagenomics', 'GLlbsMetag', 'GLlblMetag', '']",
+              metavar = "GLMetagenomics"),
 
   make_option(c("--version"), action = "store_true", type = "logical",
               default = FALSE,
@@ -122,15 +123,15 @@ if (opt$version) {
 
 
 
-if(is.null(opt[["metadata-table"]])) {
+if (is.null(opt[["metadata-table"]])) {
   stop("Path to a metadata file must be set.")
 }
 
-if(is.null(opt[["feature-table"]])) {
+if (is.null(opt[["feature-table"]])) {
   stop("Path to a feature table e.g. species/functions table file must be set.")
 }
 
-if(opt[["samples-column"]] == "Sample Name") {
+if (opt[["samples-column"]] == "Sample Name") {
   message("I will assume that the sample names are in a column named 'Sample Name' \n")
 }
 
@@ -153,23 +154,22 @@ run_decontam <- function(feature_table, metadata, contam_threshold = 0.1,
   # Retain metadata for only the samples present in the input feature table
   sub_metadata <- metadata[colnames(feature_table), ]
   # Modify NTC concentration
-  # Often times the user may set the NTC concentration to zero because they think nothing 
+  # Often times the user may set the NTC concentration to zero because they think nothing
   # should be in the negative control but decontam fails if the value is set to zero.
   # To prevent decontam from failing, we replace zero with a very small concentration value
   # 0.0000001
   if (!is.null(freq_col)) {
 
-    sub_metadata <- sub_metadata %>% 
+    sub_metadata <- sub_metadata %>%
       mutate(!!freq_col := map_dbl(!!sym(freq_col), .f = function(conc) {
             if (conc == 0) return(0.0000001) else return(conc)
           }
         )
       )
-    sub_metadata[, freq_col] <- as.numeric(sub_metadata[,freq_col])
-    sub_metadata[, prev_col] <- tolower(sub_metadata[,prev_col])
+    sub_metadata[, freq_col] <- as.numeric(sub_metadata[, freq_col])
 
   }
-
+  
   # Create phyloseq object
   ps <- phyloseq(otu_table(feature_table, taxa_are_rows = TRUE), sample_data(sub_metadata))
 
@@ -177,8 +177,8 @@ run_decontam <- function(feature_table, metadata, contam_threshold = 0.1,
   # control information. We'll summarize the data as a logical variable, with TRUE for control
   # samples, as that is the form required by isContaminant.
   sd <- as.data.frame(sample_data(ps)) # Extract sample metadata
-  sd[,"is.neg"] <- 0 # Initialize
-  sd[,"is.neg"] <- sample_data(ps)[[prev_col]] == ntc_name # Assign boolean value
+  sd[, "is.neg"] <- 0 # Initialize
+  sd[, "is.neg"] <- sample_data(ps)[[prev_col]] == ntc_name # Assign boolean value
   sample_data(ps) <- sd
 
   # Run Decontam
@@ -217,7 +217,7 @@ samples_column <-  opt[["samples-column"]] # 'Sample_ID'
 freq_col <- opt[["frequency-column"]] # "input_conc_ng"
 prev_col <- opt[["prevalence-column"]] # "NTC"
 threshold <- opt[["threshold"]] # 0.5
-ntc_name <- opt[["ntc_name"]] # "true"
+ntc_name <- opt[["ntc-name"]] # "true"
 # "kaiju", "kraken2", "metaphlan", "contig-taxonomy", "gene-taxonomy",
 # "gene-function", "Pathway-abundances", "Gene-families-KO", "Gene-families-uniref"
 method <- opt[["classification-method"]] # 'kaiju'
@@ -229,64 +229,72 @@ suffix <- opt[["assay-suffix"]] # GLlbnMetag
 
 # Prepare feature table
 feature_table <- read_delim(feature_table_file) %>%  as.data.frame()
-rownames(feature_table) <- feature_table[[1]]
-feature_table <- feature_table[, -1]  %>% as.matrix()
+row.names(feature_table) <- feature_table[[1]]
+feature_table <- feature_table[, -1] %>% as.matrix()
 
 
 # Prepare metadata
-metadata <- read_delim(metadata_file) %>% as.data.frame()
+metadata <- read_delim(metadata_file)
+
+# cast prevalence column (if present) to character and convert to lowercase
+if (!is.null(prev_col) && prev_col %in% colnames(metadata)) {
+  metadata <- metadata %>%
+              mutate(!!prev_col := as.character(!!sym(prev_col)) %>%
+              tolower()) %>%
+              as.data.frame()
+  # convert ntc_name to lowercase to match prevalence column setting above
+  ntc_name <- tolower(ntc_name)
+} else {
+  metadata <- metadata %>% as.data.frame()
+}
 row.names(metadata) <- metadata[, samples_column]
 
 # Subset metadata and feature table  to contain the samples
 samples <- intersect(colnames(feature_table), rownames(metadata))
-metadata <- metadata[samples,]
-feature_table <- feature_table[,samples]
-
-# Combined-contig-level-taxonomy
-# Combined-gene-level-KO-function
-# Combined-gene-level-taxonomy
+metadata <- metadata[samples, ]
+feature_table <- feature_table[, samples]
 
 if (method == "gene-function")  {
 
-        name <- "Combined-gene-level-KO-function"
+  name <- "Combined-gene-level-KO-function"
 
 } else if (method == "gene-taxonomy") {
 
-        name <- "Combined-gene-level-taxonomy"
+  name <- "Combined-gene-level-taxonomy"
 
 } else if (method == "contig-taxonomy") {
 
-       name <- "Combined-contig-level-taxonomy"
+  name <- "Combined-contig-level-taxonomy"
 
 } else {
 
-      name <- method
+  name <- method
 
 }
 
 # Run decontam
 # Assign prev and freq column names to NULL if the values in the supplied columns aren't unique
-if( length(unique(metadata[,prev_col])) == 1) prev_col <- NULL
-if( length(unique(metadata[,freq_col])) == 1) freq_col <- NULL
+if (length(unique(metadata[,prev_col])) == 1) prev_col <- NULL
+if (length(unique(metadata[,freq_col])) == 1) freq_col <- NULL
 
 # Error if values in both prevalence and frequency columns are not different between samples within each column 
 #i.e no difference between negative control(s) and other samples
-if(is.null(freq_col) && is.null(prev_col)){
+if (is.null(freq_col) && is.null(prev_col)) {
 
-   text2write <- "Values in both NTC and concentration columns are not unique between samples within each column.\nTherefore, feature decontamination with decontam cannot be performed."
+  text2write <- "Values in both NTC and concentration columns are not unique between samples within each column.\nTherefore, feature decontamination with decontam cannot be performed."
 
-   file_name <- glue("{prefix}{name}_decontam_failure.txt")
+  file_name <- glue("{prefix}{name}_decontam_failure.txt")
 
-   cat(text2write, file = file_name)
+  cat(text2write, file = file_name)
 
-   contamdf <- data.frame(x = rownames(feature_table), freq = NA,
-          prev = NA, p.freq = NA, p.prev = NA, p = NA, contaminant = FALSE)
-   colnames(contamdf)[1] <- feature_column
+  contamdf <- data.frame(x = rownames(feature_table), freq = NA,
+        prev = NA, p.freq = NA, p.prev = NA, p = NA, contaminant = FALSE)
+  colnames(contamdf)[1] <- feature_column
 
-}else{
+} else {
 
-    contamdf <- run_decontam(feature_table, metadata, threshold, prev_col, freq_col, ntc_name) 
-    contamdf <- as.data.frame(contamdf) %>% rownames_to_column(feature_column)
+  contamdf <- run_decontam(feature_table, metadata, threshold, prev_col, freq_col, ntc_name) 
+  contamdf <- as.data.frame(contamdf) %>% rownames_to_column(feature_column)
 
 }
 
@@ -296,13 +304,6 @@ write_tsv(x = contamdf, file = outfile)
 
 taxonomy_methods <- c("kaiju", "kraken2", "metaphlan", "gene-taxonomy", "contig-taxonomy")
 
-# Add _species string to output file name if it is a taxonomy method
-if (any(grepl(pattern = method, x = taxonomy_methods))) {
-  outfile <- glue("{prefix}{name}_decontam_species_table{suffix}.tsv")
-} else {
-  outfile <- glue("{prefix}{name}_decontam_table{suffix}.tsv")
-}
-
 # Get the list of contaminants identified by decontam
 contaminants <- contamdf %>%
                    filter(contaminant == TRUE) %>%
@@ -311,19 +312,25 @@ contaminants <- contamdf %>%
 # Drop contaminants(s) if detected
 if (length(contaminants) > 0) {
 
-# Drop contaminant features identified by decontam
-decontaminated_table <- feature_table %>%
-  as.data.frame() %>%
-  rownames_to_column(feature_column) %>%
-  filter(str_detect(!!sym(feature_column),
-                    pattern = str_c(contaminants,
-                                    collapse = "|"),
-                    negate = TRUE))
+  # Drop contaminant features identified by decontam
+  decontaminated_table <- feature_table %>%
+    as.data.frame() %>%
+    rownames_to_column(feature_column) %>%
+    filter(str_detect(!!sym(feature_column),
+                      pattern = str_c(contaminants,
+                                      collapse = "|"),
+                      negate = TRUE))
 
-rownames(decontaminated_table) <- decontaminated_table[[feature_column]]
-decontaminated_table <- decontaminated_table[, -1] %>% as.matrix
+  rownames(decontaminated_table) <- decontaminated_table[[feature_column]]
 
-write_tsv(x = decontaminated_table, file = outfile)
+  # Add _species string to output file name if it is a taxonomy method
+  if (any(grepl(pattern = method, x = taxonomy_methods))) {
+    outfile <- glue("{prefix}{name}_decontam_species_table{suffix}.tsv")
+  } else {
+    outfile <- glue("{prefix}{name}_decontam_table{suffix}.tsv")
+  }
+
+  write_tsv(x = decontaminated_table, file = outfile)
 
 } else {
   message("No contaminant was detected by Decontam")
