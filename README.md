@@ -22,14 +22,6 @@ The table below details the default maximum resource allocations for individual 
 > [!TIP]
 > These per-process resource allocations are defaults. They can be adjusted by modifying `cpus` and `memory` directives in the  [default.config](config/default.config), [illumina.config](config/illumina.config) and [nanopore.config](config/nanopore.config) configuration files. For more granular information on resource allocation, see the full workflow documentation in [GeneLab_Metagenomics_Workflow_Documentation.md](./GeneLab_Metagenomics_Workflow_Documentation.md)
 
-<br>
-
-<details open>
-<summary>NF_MetagenomeSeq Workflow Diagram</summary>
-<p align="center">
-<a href="images/GL-metagenomics-subwayplot.pdf"><img src="images/GL-metagenomics-subwayplot.png"></a>
-</p>
-</details>
 
 <br>
 
@@ -373,7 +365,7 @@ nextflow run main.nf -resume \
       * `singularity` - instructs Nextflow to use Singularity container environments
       * `docker` - instructs Nextflow to use Docker container environments
       * `conda` - instructs Nextflow to use Conda environments via the Conda package manager
-        > *Note: By default, Nextflow will create environments at runtime using the yaml files in the [envs](envs/) folder. You can change this behavior by using the `--conda_*` workflow parameters or by editing the [default](config/default.config) and [nanopore](config/nanopore.config) config files to specify a centralized Conda environments directory via the `conda.cacheDir` parameter.*
+        > *Note: By default, Nextflow will create Conda and Mamba  environments at runtime using the yaml files in the [envs](envs/) folder. You can change this behavior by using the `--conda_*` workflow parameters to adjust individual environments or by editing the [profiles](config/profiles.config) config file to specify the path where Conda or Mamba environments are stored using the `conda.cacheDir` parameter.*
       * `mamba` - instructs Nextflow to use Conda environments via the Mamba package manager 
    * Other option (can be combined with the software environment option above using a comma, e.g. `-profile slurm,singularity`):
       * `slurm` - instructs Nextflow to use the [Slurm cluster management and job scheduling system](https://slurm.schedmd.com/overview.html) to schedule and run the jobs on a Slurm HPC cluster

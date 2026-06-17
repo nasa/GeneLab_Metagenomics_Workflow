@@ -295,6 +295,8 @@ include { read_based } from "./modules/read_based_processing.nf"
 // Assembly-based workflow
 include { assembly_based } from "./modules/assembly_based_processing.nf"
 
+include { GET_RUNSHEET } from "./modules/create_runsheet.nf"
+
 
 // Workflow to perform read-based analysis
 workflow run_read_based_analysis {
@@ -306,7 +308,7 @@ workflow run_read_based_analysis {
 
     main:
 
-        software_versions_ch = Channel.empty()    
+        software_versions_ch = channel.empty()    
         read_based(reads_per_sample, metadata, filtered_ch, 
                     params.krakendb_dir,
                     params.kaijudb_dir,
@@ -333,7 +335,7 @@ workflow run_assembly_based_analysis {
 
 
     main:
-        software_versions_ch = Channel.empty()
+        software_versions_ch = channel.empty()
 
         kofam_db = params.ko_db_dir
         cat_db = params.cat_db
@@ -374,7 +376,7 @@ workflow {
     } 
         
      // Software Version Capturing - runsheet
-     software_versions_ch = Channel.empty()
+     software_versions_ch = channel.empty()
 
      // Parse file input
        if(params.accession){
@@ -387,7 +389,7 @@ workflow {
        GET_RUNSHEET.out.version | mix(software_versions_ch) | set{software_versions_ch}
       }else{
  
-       Channel.fromPath(params.input_file, checkIfExists: true)
+       channel.fromPath(params.input_file, checkIfExists: true)
            .splitCsv(header:true)
            .set{file_ch}
       }
@@ -451,9 +453,9 @@ workflow {
 
      // Software Version Capturing - combining all captured software versions
      nf_version = "Nextflow Version ".concat("${nextflow.version}")
-     nextflow_version_ch = Channel.value(nf_version)
+     nextflow_version_ch = channel.value(nf_version)
      workflow_version = "Metagenomics ".concat("${workflow.manifest.version}")
-     workflow_version_ch =  Channel.value(workflow_version)
+     workflow_version_ch =  channel.value(workflow_version)
 
      //  Write software versions to file
      software_versions_ch | map { it.text.strip() }
