@@ -162,7 +162,7 @@ The **GeneLab Metagenomics Sequencing Data Processing Workflow** is a comprehens
   - Flye + Medaka polishing (Nanopore)
 - **Gene prediction**: Prodigal
 - **Annotation**:
-  - KOFAM Scan (KEGG function annotation)
+  - KoFamScan (KEGG function annotation)
   - CAT (Contig Annotation Tool) for taxonomy
 - **Binning**: MetaBAT2
 - **Quality assessment**: CheckM
@@ -322,7 +322,7 @@ The workflow can **automatically download and set up** required databases if not
 | Database   | Parameter         | Auto-download               |
 | ---------- | ----------------- | --------------------------- |
 | CAT        | `--cat_db`        | ✅ Yes (via `--CAT_DB_LINK`) |
-| KOFAM Scan | `--ko_db_dir`     | ✅ Yes                       |
+| KoFamScan | `--ko_db_dir`     | ✅ Yes                       |
 | GTDB-Tk    | `--gtdbtk_db_dir` | ✅ Yes (via `--GTDBTK_LINK`) |
 
 ### Database Root Directory
@@ -747,12 +747,12 @@ read_based_processing.nf
   │   ├─→ Kraken2
   │   ├─→ Kaiju
   │   ├─→ Metaphlan
-  │   └─→ HUMAnN3 (Chocophlan, UniRef, Utilities)
+  │   └─→ HUMAnN3 (Chocophlan, UniRef,or Utilities)
   │
   ├─→ [Illumina] HUMAnN3 + Metaphlan4
   │   ├─→ Per-sample profiling
   │   ├─→ Merge tables
-  │   ├─→ Normalize (CPM, relab)
+  │   ├─→ Normalize (copies per million or relative abundance)
   │   ├─→ Group/stratify
   │   ├─→ Filtering (rare taxa/functions)
   │   └─→ Visualization
@@ -780,7 +780,7 @@ assembly_based_processing.nf
   │
   ├─→ Database setup
   │   ├─→ CAT
-  │   ├─→ KOFAM Scan
+  │   ├─→ KOFamScan
   │   └─→ GTDB-Tk
   │
   ├─→ Assembly
@@ -791,7 +791,7 @@ assembly_based_processing.nf
   │
   ├─→ Gene prediction (Prodigal)
   │
-  ├─→ Functional annotation (KOFAM Scan)
+  ├─→ Functional annotation (KOFamScan)
   │
   ├─→ Contig taxonomy (CAT)
   │
@@ -886,7 +886,7 @@ Pre-defined environments in `envs/`:
 - `megahit.yaml`
 - And more...
 
-You can provide paths to existing conda environments:
+Conda environments can be specified on the command-line:
 ```bash
 --conda_megahit /path/to/existing/megahit/env
 ```
@@ -1000,7 +1000,7 @@ The workflow integrates the following major tools:
 
 ### Functional Annotation
 - HUMAnN3
-- KOFAM Scan
+- KoFamScan
 - KEGG Decoder
 
 ### Assembly & Binning
@@ -1049,13 +1049,30 @@ If you use this workflow, please cite:
 ## Changelog
 
 ### [Version 1.0.0-beta](CHANGELOG.md)
-- Initial Nextflow DSL2 implementation
-- Support for Illumina and Nanopore
-- Standard and low biomass sample types
-- Read-based and assembly-based workflows
-- Automatic database management
-- GeneLab accession integration for traditional metagenomics (not supported for low biomass datasets)
-- Comprehensive quality control and reporting
+
+This is the initial beta release of the NF_MetagenomeSeq workflow which is an extension of the previous
+[NF_MGIllumina workflow](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Illumina/Workflow_Documentation/NF_MGIllumina/).
+
+### Added
+- Two additional taxonomic profiling tools to the Read-based processing subworkflow
+  - Kaiju taxonomic profiling
+  - Kraken2 taxonomic profiling
+- Downstream analysis and visualization for both Read-based and Assembly-based processing outputs
+  - Feature filtering for all output datatypes
+  - Barplots or Heatmaps for each output datatype
+- Low biomass metagenomics processing support for both short-read (Illumina) and long-read (Nanopore) data
+  - Implement short-read low biomass pipeline [GL-DPPD-7117](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions/GL-DPPD-7117.md)
+  - Implement long-read low biomass pipeline [GL-DPPD-7116](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7116_Versions/GL-DPPD-7116.md)
+    - Long-read specific pre-processing
+    - Long-read specific steps in the Assembly-based processing subworkflow
+  - Read decontamination/filtering during pre-processing for both short- and long-read data
+  - Feature decontamination using decontam package during downstream analysis for low biomass data
+- Long-read data support for processing standard metagenomics data
+
+### Changed
+- Update to the latest standard short-read pipeline version [GL-DPPD-7107-B](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Illumina/Pipeline_GL-DPPD-7107_Versions/GL-DPPD-7107-B.md) 
+of the GeneLab Metagenomics consensus processing pipelines.
+- Replace bbduk with fastp for initial read quality filtering and adapter trimming in standard Illumina workflow
 
 ---
 
