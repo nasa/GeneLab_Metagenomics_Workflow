@@ -42,18 +42,18 @@ def parse_args():
         prog="update_assay_table",
         description="Update Metagenomics assay table from ISA.zip with processed data file information.")
     required = parser.add_argument_group("Required arguments")
-    required.add_argument('-s', '--assay_suffix', required=True, action='store', 
+    required.add_argument('-s', '--assay-suffix', required=True, action='store', 
         choices=["_GLmetagenomics", "_GLlblMetag", "_GLlbsMetag", ""],
         help="Specifies the assay suffix for the dataset (empty string if no suffix).")
     required.add_argument('-r', '--runsheet', required=True, help="Runsheet used to process the data")
-    required.add_argument('-g', "--glds_accession", required=True, 
+    required.add_argument('-g', "--glds-accession", required=True, 
                           help="GLDS accession number (e.g. GLDS-123)")
     isa_file_input = required.add_mutually_exclusive_group(required=True)
-    isa_file_input.add_argument('-i', '--isa_zip', action='store', default='',
+    isa_file_input.add_argument('-i', '--isa-zip', action='store', default='',
                                 help='Appropriate ISA file for the dataset (a zip archive, providing this instead of '
                                      'an assay table directly will attempt to extract the correct assay table given '
                                      'the provided assay and technology types.)')
-    isa_file_input.add_argument('-a', '--assay_table', action='store', default='',
+    isa_file_input.add_argument('-a', '--assay-table', action='store', default='',
                                 help='Assay table for the dataset provided directly instead of extracting from an ISA '
                                      'zip file')
     parser.add_argument("--sample-type", default="standard", action="store", choices=["standard", "low_biomass"], 
@@ -178,17 +178,19 @@ def get_verified_folders(validation_data: dict[Any, Any], common_root: Path):
     folders = defaultdict(dict)
     if "verified" in validation_data:
         for file in validation_data["verified"]:
-            p = Path(file).relative_to(common_root)
-            pieces = list(p.parts)
-            if pieces[len(pieces)-1] == "Fastq":
-                pieces.remove('Fastq')
-            subfolder = "-".join(pieces[1:len(pieces)-1])
-            filename = p.name
+            p = Path(file)
+            if p.is_relative_to(common_root):
+                p = p.relative_to(common_root)
+                pieces = list(p.parts)
+                if pieces[len(pieces)-1] == "Fastq":
+                    pieces.remove('Fastq')
+                subfolder = "-".join(pieces[1:len(pieces)-1])
+                filename = p.name
 
-            if subfolder in folders[pieces[0]]:
-                folders[pieces[0]][subfolder].append(filename)
-            else:
-                folders[pieces[0]][subfolder] = [filename]
+                if subfolder in folders[pieces[0]]:
+                    folders[pieces[0]][subfolder].append(filename)
+                else:
+                    folders[pieces[0]][subfolder] = [filename]
     
     return folders
 
