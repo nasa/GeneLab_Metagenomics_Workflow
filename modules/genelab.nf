@@ -414,7 +414,7 @@ process GENERATE_CURATION_TABLE {
                     --output-prefix '${meta.output_prefix}' \\
                     --assay_suffix '${meta.assay_suffix}' \\
                     --read-stats '${read_statistics}' \\
-                    --validation-json '${meta.validation_manifest}'
+                    --validation-json ${validation_manifest}
         """
 }
 
