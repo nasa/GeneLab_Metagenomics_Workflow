@@ -515,7 +515,7 @@ def main():
     sample_names = read_samples(args.runsheet)
 
     # ------------------ FASTQ SEQUENCE ANALYSIS AND VALIDATION ------------------
-    raw_prefix = "raw" if tech == "nanopore" else "raw"
+    raw_prefix = "raw" if tech == "nanopore" else "HRrm"
     raw_multiqc_zip = Path(raw_dir, f"MultiQC_Reports/{output_prefix}{raw_prefix}_multiqc{assay_suffix}_data.zip")
     check_multiqc_outputs(validation_log, tech, sample_names, raw_multiqc_zip, raw_prefix, 
                           args.raw_R1_suffix, args.raw_R2_suffix, args.raw_suffix, args.single_ended)
