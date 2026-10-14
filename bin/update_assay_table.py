@@ -1151,9 +1151,9 @@ def main():
     elif args.technology == "nanopore":
         tech_type = "long"
         if suffix != "":
-            report_warning(f"Incorrect assay suffix provided. metagenomics-lowbiomass-longread requires an empty suffix, not {suffix}")
-        resource_category = "metagenomics-lowbiomass-longread"
-        osdr_technology_str = "long read low-biomass DNA sequencing"
+            report_warning(f"Incorrect assay suffix provided. metagenomics-longread requires an empty suffix, not {suffix}")
+        resource_category = "metagenomics-longread"
+        osdr_technology_str = "long read DNA sequencing"
     else:
         report_failure_and_exit(
             f"Assay type {args.sample_type} and technology {args.technology} do not have a defined assay file format."
