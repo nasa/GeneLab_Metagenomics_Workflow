@@ -592,7 +592,7 @@ process GENERATE_PROTOCOL {
         path(software_versions)
         path(templates)
     output:
-        path("protocol.txt")
+        path("protocol.txt"), emit: protocol
     script:
         def concat_flag = params.concated ? "--concat-reads": ""
         def host_removed_flag = params.host_removed ? "--host-removed" : ""

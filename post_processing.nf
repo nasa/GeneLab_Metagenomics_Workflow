@@ -294,14 +294,28 @@ workflow {
 
         CLEAN_RAW_PATHS(raw_multiqc)
         CLEAN_FILTERED_PATHS(filtered_multiqc)
+        // initiallize optional channels
+        trimmed_zip_res  = channel.empty()
+        human_zip_res    = channel.empty()
+        decontam_zip_res = channel.empty()
+        host_zip_res     = channel.empty()
+        
         if (params.technology == "nanopore") {
           CLEAN_TRIMMED_PATHS(trimmed_multiqc)
           CLEAN_HUMAN_PATHS(human_multiqc)
+          trimmed_zip_res = CLEAN_TRIMMED_PATHS.out.clean_zip
+          human_zip_res   = CLEAN_HUMAN_PATHS.out.clean_zip
         }
 
-        if (params.sample_type == "low_biomass"){ CLEAN_DECONTAM_PATHS(decontam_multiqc) } 
+        if (params.sample_type == "low_biomass"){ 
+            CLEAN_DECONTAM_PATHS(decontam_multiqc) 
+           decontam_zip_res = CLEAN_DECONTAM_PATHS.out.clean_zip 
+         } 
         
-        if (params.host_removed) { CLEAN_HOST_PATHS(host_multiqc) }
+        if (params.host_removed) { 
+            CLEAN_HOST_PATHS(host_multiqc) 
+            host_zip_res = CLEAN_HOST_PATHS.out.clean_zip
+         }
 
          
         // Automatic verification and validation
@@ -349,10 +363,10 @@ workflow {
           processing_info_ch = PACKAGE_PROCESSING_INFO.out.zip
           raw_zip            = CLEAN_RAW_PATHS.out.clean_zip
           filtered_zip       = CLEAN_FILTERED_PATHS.out.clean_zip
-          trimmed_zip        = CLEAN_TRIMMED_PATHS.out.clean_zip
-          human_removed_zip  = CLEAN_HUMAN_PATHS.out.clean_zip
-          decontam_zip       = CLEAN_DECONTAM_PATHS.out.clean_zip
-          host_removed_zip   = CLEAN_HOST_PATHS.out.clean_zip
+          trimmed_zip        = trimmed_zip_res
+          human_removed_zip  = human_zip_res
+          decontam_zip       = decontam_zip_res
+          host_removed_zip   = host_zip_res
           log_ch             = VALIDATE_PROCESSING.out.log
           json_ch            = VALIDATE_PROCESSING.out.json
           read_stats_ch      = GENERATE_READ_STATS.out.stats
@@ -371,6 +385,8 @@ output {
     filtered_zip {
     }
     trimmed_zip {
+    }
+    decontam_zip{
     }
     human_removed_zip {
     }
