@@ -404,15 +404,15 @@ process GENERATE_CURATION_TABLE {
         path("*.txt"), emit: curation_table
 
     script:
-        def INPUT_TABLE = params.assay_table ? "--assay_table ${input_table}" : "--isa_zip  ${input_table}"
+        def INPUT_TABLE = params.assay_table ? "--assay-table ${input_table}" : "--isa-zip  ${input_table}"
         """
         update_assay_table.py ${INPUT_TABLE} \\
                     --technology ${params.technology} \\
                     --sample-type ${params.sample_type} \\
                     --runsheet '${runsheet}' \\
-                    --glds_accession  '${meta.glds_accession}' \\
+                    --glds-accession  '${meta.glds_accession}' \\
                     --output-prefix '${meta.output_prefix}' \\
-                    --assay_suffix '${meta.assay_suffix}' \\
+                    --assay-suffix '${meta.assay_suffix}' \\
                     --read-stats '${read_statistics}' \\
                     --validation-json ${validation_manifest}
         """
