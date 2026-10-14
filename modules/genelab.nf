@@ -356,29 +356,25 @@ process GENERATE_READ_STATS {
  *      Cardinality: one
  *      Description: Map input combining multiple channel elements
  *
- *   2. path: processing_dir
- *      Cardinality: one
- *      Description: Input directory: processing directory with files to generate md5sums for
- *
- *   3. path: input_table
+ *   2. path: input_table
  *      Cardinality: one
  *      Description: Input file: input_table
  *
- *   4. path: runsheet
+ *   3. path: runsheet
  *      Cardinality: one
  *      Description: Input file: processing runsheet
  *
- *   5. path: read_statistics
+ *   4. path: read_statistics
  *      Cardinality: one
  *      Description: Input file: read_statistics
  *
- *   6. path: validation_manifest
+ *   5. path: validation_manifest
  *      Cardinality: one
  *      Description: Input file: validation manifest JSON file   
  * 
  *
  * OUTPUTS:
- *   1. path: ${meta.glds_accession}_${meta.output_prefix}-associated-file-names.tsv (emit: curation_table)
+ *   1. path: *.txt (emit: curation_table)
  *
  * SOFTWARE & CONTAINERS:
  *   Container: [Defined in config/post_processing.config]
@@ -399,31 +395,26 @@ process GENERATE_CURATION_TABLE {
     input:
         // GeneLab accession and Suffixes
         val(meta)
-        path(processing_dir)
         path(input_table)
         path(runsheet)
-        path(human_summary) // human_removed_summary.tsv
         path(read_statistics)
         path(validation_manifest)
         
     output:
-        path("${meta.glds_accession}_${meta.output_prefix}-associated-file-names.tsv"), emit: curation_table
+        path("*.txt"), emit: curation_table
 
     script:
-        def INPUT_TABLE = params.assay_table ? "--assay-table ${input_table}" : "--isa-zip  ${input_table}"
-        def hum_summary = params.human_summary ? "--hrrm_stats ${human_summary}" : ""
+        def INPUT_TABLE = params.assay_table ? "--assay_table ${input_table}" : "--isa_zip  ${input_table}"
         """
         update_assay_table.py ${INPUT_TABLE} \\
                     --technology ${params.technology} \\
                     --sample-type ${params.sample_type} \\
                     --runsheet '${runsheet}' \\
-                    --output '${meta.glds_accession}_${meta.output_prefix}-associated-file-names.tsv' \\ # it doesn't have the output agument so I wonder what it will be
-                    --processed_file_path ${processing_dir} \\
                     --glds_accession  '${meta.glds_accession}' \\
                     --output-prefix '${meta.output_prefix}' \\
                     --assay_suffix '${meta.assay_suffix}' \\
-                    --read_stats_file '${read_statistics}' \\
-                    --validation_output_json '${meta.validation_manifest}' ${hum_summary}
+                    --read-stats '${read_statistics}' \\
+                    --validation-json '${meta.validation_manifest}'
         """
 }
 

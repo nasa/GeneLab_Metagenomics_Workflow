@@ -1,11 +1,12 @@
 #!/usr/bin/env nextflow
-nextflow.enable.dsl=2
 
 // Terminal text color definitions
-c_back_bright_red = "\u001b[41;1m";
-c_bright_green    = "\u001b[32;1m";
-c_blue            = "\033[0;34m";
-c_reset           = "\033[0m";
+def colours() {
+    [ back_bright_red: "\u001b[41;1m",
+      bright_green   : "\u001b[32;1m",
+      blue           : "\033[0;34m",
+      reset          : "\033[0m" ]
+}
 
 params.help = false
 
@@ -13,7 +14,7 @@ params.help = false
 /**************************************************
 * HELP MENU  **************************************
 **************************************************/
-if(params.help){
+def printHelp() {
 
   println()
   println("GeneLab Post Processing Pipeline: $workflow.manifest.version")
@@ -106,7 +107,9 @@ if(params.help){
   println("                   Example, ../Genelab/a_OSD-574_metagenomic-sequencing_whole-genome-shotgun-sequencing_illumina.txt. Default: empty string")
   println("    --isa_zip  [PATH] Genelab ISA zip files containing an assay atable for the OSD accession. This is only required if --files.assay_table is not set.")
   println("                   Example, ../Genelab/OSD-574_metadata_OSD-574-ISA.zip. Default: empty string")
-  println("    --runsheet  [PATH] Input csv file used to run the processing pipeline with the first column containing sample names. This is the value set to the paremater --input_file when run the processing pipeline with a csv file as input otherwise it is the GLfile.csv in the GeneLab directory if --GLDS_accession was used as input. Example '../GeneLab/GLfile.csv'.  Default: null")
+  println("""  --runsheet  [PATH] Input csv file used to run the processing pipeline with the first column containing sample names. 
+           This is the value set to the paremater --input_file when run the processing pipeline with a csv file as input otherwise it is the GLfile.csv
+           in the GeneLab directory if --GLDS_accession was used as input. Example '../GeneLab/GLfile.csv'.  Default: null""")
   println("    --software_versions  [PATH] A file generated after running the processing pipeline listing the software versions used. Default: ../Metadata/software_versions.txt")
   println()
   println("Directories:")
@@ -120,16 +123,15 @@ if(params.help){
   println()
   println("Paths to existing conda environments to use otherwise a new one will be created using the yaml file in envs/.")
   println("    --conda_genelab [PATH] Path to a conda environment containing genelab-utils. Default: null.")
-  exit 0
 }
 
 
 /************************************************
 *********** Show pipeline parameters ************
 *************************************************/
-if(params.debug){
+def printParams() {
 
-log.info """${c_blue}
+log.info """${colours().blue}
          GeneLab Post Processing Pipeline: $workflow.manifest.version
          
          You have set the following parameters:
@@ -198,6 +200,18 @@ include { PACKAGE_PROCESSING_INFO;  GENERATE_READ_STATS; VALIDATE_PROCESSING;
            GENERATE_MD5SUMS; GENERATE_PROTOCOL} from './modules/genelab.nf'
 
 workflow {
+        
+        main:
+        // Terminal text colors (see colours() above)
+        def c_back_bright_red = colours().back_bright_red
+        def c_bright_green    = colours().bright_green
+        def c_reset           = colours().reset
+
+        // Help menu
+        if (params.help) { printHelp() ; exit 0 }
+
+        // Show pipeline parameters
+        if (params.debug) { printParams() }
 
         // Make sure accession numbers are set
         if(!params.glds_accession || !params.osd_accession){
@@ -260,10 +274,10 @@ workflow {
       files_ch = channel.of(params.run_command, params.processing_commands,
                             params.software_versions, params.runsheet)
                                       .collect()
-                                      .map{ run_command, processing_commands, software_versions, runsheet ->
+                                      .map{ run_command, processing_commands, sw_versions, runsheet ->
                                             tuple( file(run_command, checkIfExists: true),
                                                    file(processing_commands, checkIfExists: true),
-                                                   file(software_versions, checkIfExists: true),
+                                                   file(sw_versions, checkIfExists: true),
                                                    file(runsheet, checkIfExists: true)
                                                  ) }
 
@@ -299,12 +313,12 @@ workflow {
                             decontam_multiqc.ifEmpty(file('decontam_empty.txt')), 
                             host_multiqc.ifEmpty(file('host_empty.txt')))
         
-        /*
+        
         // Generate curation file association table
-        GENERATE_CURATION_TABLE(meta_ch, processing_dir, assay_table_ch, runsheet_ch,
-                                human_summary_ch, GENERATE_READ_STATS.out.stats, 
+        GENERATE_CURATION_TABLE(meta_ch, assay_table_ch, runsheet_ch,
+                                GENERATE_READ_STATS.out.stats, 
                                 VALIDATE_PROCESSING.out.json)
-        */
+        
 
         // Generate README file
         GENERATE_README(meta_ch, PACKAGE_PROCESSING_INFO.out.zip, 
@@ -316,19 +330,64 @@ workflow {
         
         // Write methods
         GENERATE_PROTOCOL(meta_ch, software_versions, templates)
+
+        workflow.onComplete = {
+
+            println("${c_bright_green}Pipeline completed at: $workflow.complete")
+            println("""Execution status: ${ workflow.success ? 'OK' : "${c_back_bright_red}failed" }""")
+            log.info ( workflow.success ? "\nDone! Workflow completed without any error\n" : "Oops .. something went wrong${c_reset}" )
+
+            if ( workflow.success ) {
+
+                println("Post-processing Outputs: ${params.output_dir} ${c_reset}")
+                println()
+
+            }
+        }
+
+        publish:
+          processing_info_ch = PACKAGE_PROCESSING_INFO.out.zip
+          raw_zip            = CLEAN_RAW_PATHS.out.clean_zip
+          filtered_zip       = CLEAN_FILTERED_PATHS.out.clean_zip
+          trimmed_zip        = CLEAN_TRIMMED_PATHS.out.clean_zip
+          human_removed_zip  = CLEAN_HUMAN_PATHS.out.clean_zip
+          decontam_zip       = CLEAN_DECONTAM_PATHS.out.clean_zip
+          host_removed_zip   = CLEAN_HOST_PATHS.out.clean_zip
+          log_ch             = VALIDATE_PROCESSING.out.log
+          json_ch            = VALIDATE_PROCESSING.out.json
+          read_stats_ch      = GENERATE_READ_STATS.out.stats
+          curation_table_ch  = GENERATE_CURATION_TABLE.out.curation_table
+          readme_ch          = GENERATE_README.out.readme
+          md5sum_ch          = GENERATE_MD5SUMS.out.md5sum
+          protocol_ch        = GENERATE_PROTOCOL.out.protocol  
 }
 
-
-workflow.onComplete {
-
-    println("${c_bright_green}Pipeline completed at: $workflow.complete")
-    println("""Execution status: ${ workflow.success ? 'OK' : "${c_back_bright_red}failed" }""")
-    log.info ( workflow.success ? "\nDone! Workflow completed without any error\n" : "Oops .. something went wrong${c_reset}" )
-
-    if ( workflow.success ) {
-
-    println("Post-processing Outputs: ${params.output_dir} ${c_reset}")
-    println()
-
+output {
+    // Post-processing outputs
+    processing_info_ch {
+    }
+    raw_zip {
+    }
+    filtered_zip {
+    }
+    trimmed_zip {
+    }
+    human_removed_zip {
+    }
+    host_removed_zip {
+    }
+    log_ch {
+    }
+    json_ch {
+    }
+    read_stats_ch {
+    }
+    curation_table_ch {
+    }
+    readme_ch {
+    }
+    md5sum_ch {
+    }
+    protocol_ch {  
     }
 }
