@@ -28,8 +28,8 @@ required.add_argument("--email", required=True,
                     help='Email address of individual who performed the processing')
 parser.add_argument("--output", "--output-name", default="README.txt",
                     help='Name of output file (default: "{output-prefix}README{assay-suffix}.txt")')
-parser.add_argument("--protocol-id", default="GL-DPPD-7107-A",
-                    help='Protocol document ID followed (default: "GL-DPPD-7107-A")')
+parser.add_argument("--protocol-id",
+                    help='Protocol document ID followed (optional). Overwrites automatic selection based on technology and sample-type parameters(GL-DPPD-7116, GL-DPPD-7117, GL-DPPD-7107-B).')
 parser.add_argument("--runsheet", default="PE_file.csv",
                     help='Runsheet file name (default: "PE_file.csv")')
 parser.add_argument("--technology", default="illumina", choices=["illumina", "nanopore"],
@@ -67,14 +67,29 @@ def main():
     
     runsheet = Path(args.runsheet)
 
+    is_nanopore = True if args.technology == "nanopore" else False
+    is_low_biomass = True if args.sample_type == "low_biomass" else False
+
+    if args.protocol_id is not None:
+        protocol_id = args.protocol_id
+    else:
+        if is_nanopore:
+            protocol_id = "GL-DPPD-7116"
+        else:
+            if is_low_biomass:
+                protocol_id = "GL-DPPD-7117"
+            else:
+                protocol_id = "GL-DPPD-7107-B"
+    
+
     # read validation json if present
     validation_manifest = dict()
     if args.validation_json is not None:
         validation_manifest = import_validation_manifest(Path(args.validation_json))
 
     with open(output_file_name, "w") as output:
-        write_header(output, args.osd_id, args.name, args.email, args.protocol_id, args.date)
-        write_metagenomics_body(output, runsheet, prefix, suffix, validation_manifest)
+        write_header(output, args.osd_id, args.name, args.email, protocol_id, args.date)
+        write_metagenomics_body(output, runsheet, prefix, suffix, validation_manifest, output_file_name, is_nanopore, is_low_biomass)
 
 
 def import_validation_manifest(validation_json: Path):
@@ -178,6 +193,8 @@ def add_level_five(file_name:str, file_description:str, output_file:TextIOWrappe
         lines = "   |           |   |--"
     elif gap == 34:
         lines = "   |   |           |--"    
+    elif gap == 24:
+        lines = "   |       |       |--"
     elif gap == 234:
         lines = "   |               |--"    
     else:
@@ -247,6 +264,8 @@ def add_spacer(output, num_lines:int = 1, gap:int = 0):
     elif num_lines == 4:
         if gap == 3:
             output.write("   |   |       |\n")
+        elif gap == 2:
+            output.write("   |       |   |\n")
         else:
             output.write("   |   |   |   |\n")
     elif num_lines == 5:
@@ -259,8 +278,8 @@ def add_spacer(output, num_lines:int = 1, gap:int = 0):
     else:
         output.write("   |\n")
 
-def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, validation_manifest: dict):
-
+def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, validation_manifest: dict, 
+                            output_file_name: str, is_nanopore: bool, is_low_biomass: bool):
 
     heatmap_plots = {
         "contig_unfiltered": {
@@ -359,7 +378,7 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
         },
         "uniref_unfiltered_50": {
             "file": f"{prefix}Gene-families-uniref_unfiltered_top_50_heatmap{suffix}.png",
-            "def": "top 50 unfiltered gene families heatmap"
+            "def": "top 50 unfiltered gene-family heatmap"
         },
         "uniref_filtered": {
             "file": f"{prefix}Gene-families-uniref_filtered_heatmap{suffix}.png",
@@ -367,7 +386,7 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
         },
         "uniref_filtered_50": {
             "file": f"{prefix}Gene-families-uniref_filtered_top_50_heatmap{suffix}.png",
-            "def": "top 50 filtered gene families heatmap"
+            "def": "top 50 filtered gene-family heatmap"
         },
         "uniref_decontam": {
             "file": f"{prefix}Gene-families-uniref_decontam_heatmap{suffix}.png",
@@ -375,7 +394,7 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
         },
         "uniref_decontam_50": {
             "file": f"{prefix}Gene-families-uniref_decontam_top_50_heatmap{suffix}.png",
-            "def": "top 50 decontaminated gene families heatmap"
+            "def": "top 50 decontaminated gene-family heatmap"
         },
         "ko_unfiltered": {
             "file": f"{prefix}Gene-families-KO_unfiltered_heatmap{suffix}.png",
@@ -433,23 +452,23 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
             "def": "filtered gene-family abundances"
         },
         "humann_uniref_decontam_results": {
-            "file": f"{prefix}Gene-family-uniref_decontam_results{suffix}.tsv",
+            "file": f"{prefix}Gene-families-uniref_decontam_results{suffix}.tsv",
             "def": "decontam results for gene-family abundances" 
         },
         "humann_uniref_decontam": {
-            "file": f"{prefix}Gene-family-KO_decontam_table{suffix}.tsv", 
+            "file": f"{prefix}Gene-families-KO_decontam_table{suffix}.tsv", 
             "def": "decontaminated gene-family abundances"
         },
         "humann_ko_filtered": {
-            "file": f"{prefix}Gene-families-KO-function_filtered{args.assay_suffix}.tsv", 
+            "file": f"{prefix}Gene-families-KO_filtered{args.assay_suffix}.tsv", 
             "def": "filtered gene-family KO-function table"
         },
         "humann_ko_decontam_results": {
-            "file": f"{prefix}Gene-families-KO-function_decontam_results{args.assay_suffix}.tsv", 
+            "file": f"{prefix}Gene-families-KO_decontam_results{args.assay_suffix}.tsv", 
             "def": "decontam results for gene-level KO-function data"
         },
         "humann_ko_decontam": {
-            "file": f"{prefix}Gene-families-KO-function_decontam_table{args.assay_suffix}.tsv", 
+            "file": f"{prefix}Gene-families-KO_decontam_table{args.assay_suffix}.tsv", 
             "def": "decontaminated gene-level KO-function data"
         },
         "humann_pathabund_filtered": {
@@ -544,11 +563,8 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
     pad = len(longest_filename) + (6 * 4) + 2
 
     # Root Level
-    add_level_one(args.output, "this file", output, pad)
+    add_level_one(output_file_name, "this file", output, pad)
     add_spacer(output)
-
-    is_nanopore = True if args.technology == "nanopore" else False
-    is_low_biomass = True if args.sample_type == "low_biomass" else False
 
     step_prefix = "raw" if is_nanopore else "HRrm"
     step = "raw" if is_nanopore else "human read removed"
@@ -587,7 +603,10 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
         add_spacer(output)
 
     add_level_one("HR-removed_Sequence_Data/", "data after human read removal", output, pad)
-    add_level_two(f"{prefix}*_HRrm{suffix}.fastq.gz", "fastq files that have been filtered and trimmed and had blank and human reads removed", output, pad)
+    if is_nanopore:
+        add_level_two(f"{prefix}*_HRrm{suffix}.fastq.gz", "fastq files that have been filtered and trimmed and had human reads removed", output, pad)
+    else:
+        add_level_two(f"{prefix}*_HRrm{suffix}.fastq.gz", "fastq files that have had human reads removed", output, pad)
     add_level_two("MultiQC_Reports/", "human read removed data MultiQC summary reports", output, pad)
     add_level_three(f"{prefix}HRrm_multiqc{suffix}.html", "MultiQC summary report for samples with human reads removed", output, pad, gap=2 if not is_nanopore else 0)
     add_level_three(f"{prefix}HRrm_multiqc{suffix}_data.zip", "MultiQC data for samples with human reads removed", output, pad, gap=2 if not is_nanopore else 0)
@@ -642,7 +661,7 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
     # Bins
     if assembly_tables["bins_overview"]["file"] in verified:
         add_level_two("bins/", "genomic bins recovered from assemblies", output, pad)
-        add_level_three(assembly_tables["bins_overview"]["file"], assembly_tables["bins_overview"]["file"], output, pad)
+        add_level_three(assembly_tables["bins_overview"]["file"], assembly_tables["bins_overview"]["def"], output, pad)
         add_level_three(f"{prefix}*-bins{suffix}.zip", "fasta files for genomic bins", output, pad)
         add_spacer(output, num_lines=2)
 
@@ -651,15 +670,17 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
 
     add_level_three("Contig-level -", "combined contig-level taxonomy data", output, pad)
  
+    add_level_four(f"{prefix}Combined-contig-level-taxonomy-coverages-CPM{suffix}.tsv", "combined contig-level taxonomy coverages normalized to coverage per million", output, pad)
+    add_level_four(f"{prefix}Combined-contig-level-taxonomy-coverages{suffix}.tsv", "combined contig-level taxonomy coverages", output, pad)
     add_level_four("Counts_Tables/", "combined contig-level taxonomy count tables", output, pad)
 
-    add_level_five(f"{prefix}Combined-contig-level-taxonomy-coverages-CPM{suffix}.tsv", "combined contig-level taxonomy coverages normalized to copies per million", output, pad)
-    add_level_five(f"{prefix}Combined-contig-level-taxonomy-coverages{suffix}.tsv", "combined contig-level taxonomy coverages", output, pad)
-    if assembly_tables["contig_filtered"] in verified:
+    if assembly_tables["contig_filtered"]["file"] in verified:
         add_level_five(assembly_tables["contig_filtered"]["file"], assembly_tables["contig_filtered"]["def"], output, pad)
     if is_low_biomass:
         if assembly_tables["contig_decontam_results"]["file"] in verified:
             add_level_five(assembly_tables["contig_decontam_results"]["file"], assembly_tables["contig_decontam_results"]["def"], output, pad)
+        if assembly_tables["contig_decontam"]["file"] in verified:
+            add_level_five(assembly_tables["contig_decontam"]["file"], assembly_tables["contig_decontam"]["def"], output, pad)
     add_spacer(output, num_lines=4)
 
     add_level_four("Heatmaps/", "combined contig-level taxonomy heatmaps", output, pad)
@@ -682,14 +703,16 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
     add_level_three("Gene-level -", "combined gene-level data", output, pad)
     add_level_four("KO -", "Kegg Orthology functional data", output, pad, gap=3)
 
+    add_level_five(f"{prefix}Combined-gene-level-KO-function-coverages-CPM{suffix}.tsv", "combined gene-level KO-function coverages normalized to coverage per million", output, pad, gap=3)
+    add_level_five(f"{prefix}Combined-gene-level-KO-function-coverages{suffix}.tsv", "combined gene-level KO-function coverages", output, pad, gap=3)
     add_level_five("Counts_Tables/", "combined gene-level KO-function count tables", output, pad, gap=3)
-    add_level_six(f"{prefix}Combined-gene-level-KO-function-coverages-CPM{suffix}.tsv", "combined gene-level KO-function coverages normalized to copies per million", output, pad, gap=3)
-    add_level_six(f"{prefix}Combined-gene-level-KO-function-coverages{suffix}.tsv", "combined gene-level KO-function coverages", output, pad, gap=3)
-    add_level_six(f"{prefix}Combined-gene-level-KO-function{suffix}.tsv", "combined gene-level KO-function data", output, pad, gap=3)    
     if assembly_tables["ko_filtered"]["file"] in verified:
         add_level_six(assembly_tables["ko_filtered"]["file"], assembly_tables["ko_filtered"]["def"], output, pad, gap=3)
-    if is_low_biomass and assembly_tables["ko_decontam_results"]["file"] in verified:
-        add_level_six(assembly_tables["ko_decontam_results"]["file"], assembly_tables["ko_decontam_results"]["def"], output, pad, gap=3)
+    if is_low_biomass:
+        if assembly_tables["ko_decontam_results"]["file"] in verified:
+            add_level_six(assembly_tables["ko_decontam_results"]["file"], assembly_tables["ko_decontam_results"]["def"], output, pad, gap=3)
+        if assembly_tables["ko_decontam"]["file"] in verified:
+            add_level_six(assembly_tables["ko_decontam"]["file"], assembly_tables["ko_decontam"]["def"], output, pad, gap=3)
     add_spacer(output, num_lines=5, gap=3)
 
     add_level_five("Heatmaps/", "combined gene-level KO-function heatmaps", output, pad, gap=3)
@@ -709,14 +732,16 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
     add_spacer(output, num_lines=4, gap=3)
 
     add_level_four("Taxonomy -", "gene-level taxonomy data", output, pad, gap=3)
+    add_level_five(f"{prefix}Combined-gene-level-taxonomy-coverages-CPM{suffix}.tsv", "combined gene-level taxonomy coverages normalized to coverage per million", output, pad, gap=34)
+    add_level_five(f"{prefix}Combined-gene-level-taxonomy-coverages{suffix}.tsv", "combined gene-level taxonomy coverages", output, pad, gap=34)
     add_level_five("Counts_Tables/", "combined gene-level taxonomy count tables", output, pad, gap=34)
-    add_level_six(f"{prefix}Combined-gene-level-taxonomy-coverages-CPM{suffix}.tsv", "combined gene-level taxonomy coverages normalized to copies per million", output, pad, gap=34)
-    add_level_six(f"{prefix}Combined-gene-level-taxonomy-coverages{suffix}.tsv", "combined gene-level taxonomy coverages", output, pad, gap=34)
-    add_level_six(f"{prefix}Combined-gene-level-taxonomy{suffix}.tsv", "combined gene-level taxonomy data", output, pad, gap=34)
     if assembly_tables["gene_filtered"]["file"] in verified:
         add_level_six(assembly_tables["gene_filtered"]["file"], assembly_tables["gene_filtered"]["def"], output, pad, gap=34)
-    if is_low_biomass and assembly_tables["gene_decontam_results"]["file"] in verified:
-        add_level_six(assembly_tables["gene_decontam_results"]["file"], assembly_tables["gene_decontam_results"]["def"], output, pad, gap=34)
+    if is_low_biomass:
+        if  assembly_tables["gene_decontam_results"]["file"] in verified:
+            add_level_six(assembly_tables["gene_decontam_results"]["file"], assembly_tables["gene_decontam_results"]["def"], output, pad, gap=34)
+        if assembly_tables["gene_decontam"]["file"] in verified:
+            add_level_six(assembly_tables["gene_decontam"]["file"], assembly_tables["gene_decontam"]["def"], output, pad, gap=34)
     add_spacer(output, num_lines=5, gap=34)
    
     add_level_five("Heatmaps/", "combined gene-level taxonomy heatmaps", output, pad, gap=34)
@@ -763,7 +788,7 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
 
 
     # Read-based Processing 
-    add_level_one("Read-based_Processing/", "taxonomic profiling results", output, pad)
+    add_level_one("Read-based_Processing/", "taxonomic and functional profiling results", output, pad)
 
     tools = ["Kaiju", "Kraken2"] if is_nanopore else ["Kaiju", "Kraken2", "Metaphlan"]
 
@@ -771,19 +796,17 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
         is_tool_last = (tool == "Kraken2") if is_nanopore else (tool == "Metaphlan")
 
         add_level_two(f"{tool}_Outputs -", f"{tool} taxonomic profiling", output, pad)
+        if tool == "Metaphlan":
+            add_level_three(f"{prefix}metaphlan-taxonomy{suffix}.tsv", "Metaphlan estimated taxonomic relative abundances", output, pad)
         if tool == "Kraken2":
             add_level_three("MultiQC_Reports -", "Kraken2 MultiQC summary reports", output, pad)
             add_level_four(f"{prefix}kraken2_multiqc{suffix}.html", "MultiQC summary report for kraken2 classification", output, pad)
             add_level_four(f"{prefix}kraken2_multiqc{suffix}_data.zip", "MultiQC data for kraken2 classification", output, pad)
-        add_level_three("Barplots/", "visualizations of taxonomic relative abundance", output, pad)
-        add_level_four(barplots[f"{tool.lower()}_unfiltered"]["file"], barplots[f"{tool.lower()}_unfiltered"]["def"], output, pad)
-        add_level_four(barplots[f"{tool.lower()}_filtered"]["file"], barplots[f"{tool.lower()}_filtered"]["def"], output, pad)
-        if is_low_biomass and barplots[f"{tool.lower()}_decontam"]["file"] in verified:
-            add_level_four(barplots[f"{tool.lower()}_decontam"]["file"], barplots[f"{tool.lower()}_decontam"]["def"], output, pad)
-        add_spacer(output, num_lines=3)
-        add_level_three("Counts_Tables/", "species relative abundance tables", output, pad)
-        if tool == "Metaphlan":
-            add_level_four(f"{prefix}metaphlan-taxonomy{suffix}.tsv", "Metaphlan estimated taxonomic relative abundances", output, pad)
+            add_spacer(output, num_lines=3)
+        if tool == "Kraken2" or tool == "Kaiju":
+            add_level_three("Counts_Tables/", "species count tables", output, pad)
+        else:
+            add_level_three("Counts_Tables/", "species count and relative abundance tables", output, pad)
         add_level_four(f"{prefix}{tool.lower()}_species_table{suffix}.tsv", f"{tool} raw species table", output, pad)
         if read_based_tables[f"{tool.lower()}_filtered"]["file"] in verified:
             add_level_four(read_based_tables[f"{tool.lower()}_filtered"]["file"], read_based_tables[f"{tool.lower()}_filtered"]["def"], output, pad)
@@ -793,104 +816,109 @@ def write_metagenomics_body(output, runsheet:Path, prefix: str, suffix: str, val
             if read_based_tables[f"{tool.lower()}_decontam_species"]["file"] in verified:
                 add_level_four(read_based_tables[f"{tool.lower()}_decontam_species"]["file"], read_based_tables[f"{tool.lower()}_decontam_species"]["def"], output, pad)
         add_spacer(output, num_lines=3)
+        add_level_three("Barplots/", "visualizations of taxonomic relative abundance", output, pad)
+        add_level_four(barplots[f"{tool.lower()}_unfiltered"]["file"], barplots[f"{tool.lower()}_unfiltered"]["def"], output, pad)
+        add_level_four(barplots[f"{tool.lower()}_filtered"]["file"], barplots[f"{tool.lower()}_filtered"]["def"], output, pad)
+        if is_low_biomass and barplots[f"{tool.lower()}_decontam"]["file"] in verified:
+            add_level_four(barplots[f"{tool.lower()}_decontam"]["file"], barplots[f"{tool.lower()}_decontam"]["def"], output, pad)
+        add_spacer(output, num_lines=3)
         add_level_three("Krona_Reports/", "interactive hierarchical taxonomy plots", output, pad)
         add_level_four(f"{prefix}{tool.lower()}-report{suffix}.html", f"Krona plots for {tool} taxonomies", output, pad, gap=3)
         add_spacer(output, num_lines=2)
 
     add_level_two("Humann_Outputs -", "Humann functional profiling", output, pad)
-    add_level_three("Gene_Families -", "Gene families", output, pad)
+    add_level_three("Gene_Families -", "Gene families", output, pad, gap=2)
     
-    add_level_four("Counts_Tables/", "uniref gene families count tables", output, pad)
-    add_level_five(f"{prefix}Gene-families{suffix}.tsv", "raw gene-family abundance table", output, pad)
-    add_level_five(f"{prefix}Gene-families-cpm{suffix}.tsv", "gene-family abundances normalized to copies-per-million", output, pad)
-    add_level_five(f"{prefix}Gene-families-grouped-by-taxa{suffix}.tsv", "gene-family abundances grouped by taxa", output, pad)
+    add_level_four(f"{prefix}Gene-families{suffix}.tsv", "raw gene-family abundance table", output, pad, gap=2)
+    add_level_four(f"{prefix}Gene-families-cpm{suffix}.tsv", "gene-family abundances normalized to copies-per-million", output, pad, gap=2)
+    add_level_four(f"{prefix}Gene-families-grouped-by-taxa{suffix}.tsv", "gene-family abundances grouped by taxa", output, pad, gap=2)
+    add_level_four("Counts_Tables/", "uniref gene families abundance tables", output, pad, gap=2)
     if read_based_tables["humann_uniref_filtered"]["file"] in verified:
-        add_level_five(read_based_tables["humann_uniref_filtered"]["file"], read_based_tables["humann_uniref_filtered"]["def"], output, pad)
+        add_level_five(read_based_tables["humann_uniref_filtered"]["file"], read_based_tables["humann_uniref_filtered"]["def"], output, pad, gap=2)
     if is_low_biomass:
         if read_based_tables["humann_uniref_decontam_results"]["file"] in verified:
-            add_level_five(read_based_tables["humann_uniref_decontam_results"]["file"], read_based_tables["humann_uniref_decontam_results"]["def"], output, pad)
+            add_level_five(read_based_tables["humann_uniref_decontam_results"]["file"], read_based_tables["humann_uniref_decontam_results"]["def"], output, pad, gap=2)
         if read_based_tables["humann_uniref_decontam"]["file"] in verified:
-            add_level_five(read_based_tables["humann_uniref_decontam"]["file"], read_based_tables["humann_uniref_decontam"]["def"], output, pad)
-    add_spacer(output, num_lines=4)
+            add_level_five(read_based_tables["humann_uniref_decontam"]["file"], read_based_tables["humann_uniref_decontam"]["def"], output, pad, gap=2)
+    add_spacer(output, num_lines=4, gap=2)
     
-    add_level_four("Heatmaps/", "uniref gene families heatmaps", output, pad)
+    add_level_four("Heatmaps/", "uniref gene families heatmaps", output, pad, gap=2)
     if humann_plots["uniref_unfiltered"]["file"] in verified:
-        add_level_five(humann_plots["uniref_unfiltered"]["file"], humann_plots["uniref_unfiltered"]["def"], output, pad)
+        add_level_five(humann_plots["uniref_unfiltered"]["file"], humann_plots["uniref_unfiltered"]["def"], output, pad, gap=24)
     if humann_plots["uniref_unfiltered_50"]["file"] in verified:
-        add_level_five(humann_plots["uniref_unfiltered_50"]["file"], humann_plots["uniref_unfiltered_50"]["def"], output, pad)
+        add_level_five(humann_plots["uniref_unfiltered_50"]["file"], humann_plots["uniref_unfiltered_50"]["def"], output, pad, gap=24)
     if humann_plots["uniref_filtered"]["file"] in verified:
-        add_level_five(humann_plots["uniref_filtered"]["file"], humann_plots["uniref_filtered"]["def"], output, pad)
+        add_level_five(humann_plots["uniref_filtered"]["file"], humann_plots["uniref_filtered"]["def"], output, pad, gap=24)
     if humann_plots["uniref_filtered_50"]["file"] in verified:
-        add_level_five(humann_plots["uniref_filtered_50"]["file"], humann_plots["uniref_filtered_50"]["def"], output, pad)
+        add_level_five(humann_plots["uniref_filtered_50"]["file"], humann_plots["uniref_filtered_50"]["def"], output, pad, gap=24)
     if is_low_biomass:
         if humann_plots["uniref_decontam"]["file"] in verified:
-            add_level_five(humann_plots["uniref_decontam"]["file"], humann_plots["uniref_decontam"]["def"], output, pad)
+            add_level_five(humann_plots["uniref_decontam"]["file"], humann_plots["uniref_decontam"]["def"], output, pad, gap=24)
         if humann_plots["uniref_decontam_50"]["file"] in verified:
-            add_level_five(humann_plots["uniref_decontam_50"]["file"], humann_plots["uniref_decontam_50"]["def"], output, pad)
-    add_spacer(output, num_lines=4)
+            add_level_five(humann_plots["uniref_decontam_50"]["file"], humann_plots["uniref_decontam_50"]["def"], output, pad, gap=24)
+    add_spacer(output, num_lines=3, gap=2)
 
-    add_level_three("KO -", "KO term abundances", output, pad)
-    add_level_four("Counts_Tables/", "KO term abundances table", output, pad)
-    add_level_five(f"{prefix}Gene-families-KO{suffix}.tsv", "KO term abundances", output, pad)
-    add_level_five(f"{prefix}Gene-families-KO-cpm{suffix}.tsv", "KO term abundances normalized to copies-per-million", output, pad)
+    add_level_three("KO -", "KO term abundances", output, pad, gap=2)
+    add_level_four(f"{prefix}Gene-families-KO-cpm{suffix}.tsv", "KO term abundances normalized to copies-per-million", output, pad, gap=2)
+    add_level_four("Counts_Tables/", "KO term abundances table", output, pad, gap=2)
     if read_based_tables["humann_ko_filtered"]["file"] in verified:
-        add_level_five(read_based_tables["humann_ko_filtered"]["file"], read_based_tables["humann_ko_filtered"]["def"], output, pad)
+        add_level_five(read_based_tables["humann_ko_filtered"]["file"], read_based_tables["humann_ko_filtered"]["def"], output, pad, gap=2)
     if args.sample_type == "low_biomass":
         if read_based_tables["humann_ko_decontam_results"]["file"] in verified:
-            add_level_five(read_based_tables["humann_ko_decontam_results"]["file"], read_based_tables["humann_ko_decontam_results"]["def"], output, pad)
+            add_level_five(read_based_tables["humann_ko_decontam_results"]["file"], read_based_tables["humann_ko_decontam_results"]["def"], output, pad, gap=2)
         if read_based_tables["humann_ko_decontam"]["file"] in verified:
-            add_level_five(read_based_tables["humann_ko_decontam"]["file"], read_based_tables["humann_ko_decontam"]["def"], output, pad)
-    add_spacer(output, num_lines=4)
+            add_level_five(read_based_tables["humann_ko_decontam"]["file"], read_based_tables["humann_ko_decontam"]["def"], output, pad, gap=2)
+    add_spacer(output, num_lines=4, gap=2)
 
-    add_level_four("Heatmaps/", "KO term abundances", output, pad)
+    add_level_four("Heatmaps/", "KO term abundance heatmaps", output, pad, gap=2)
     if humann_plots["ko_unfiltered"]["file"] in verified:
-        add_level_five(humann_plots["ko_unfiltered"]["file"], humann_plots["ko_unfiltered"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["ko_unfiltered"]["file"], humann_plots["ko_unfiltered"]["def"], output, pad, gap=24)
     if humann_plots["ko_unfiltered_50"]["file"] in verified:
-        add_level_five(humann_plots["ko_unfiltered_50"]["file"], humann_plots["ko_unfiltered_50"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["ko_unfiltered_50"]["file"], humann_plots["ko_unfiltered_50"]["def"], output, pad, gap=24)
     if humann_plots["ko_filtered"]["file"] in verified:
-        add_level_five(humann_plots["ko_filtered"]["file"], humann_plots["ko_filtered"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["ko_filtered"]["file"], humann_plots["ko_filtered"]["def"], output, pad, gap=24)
     if humann_plots["ko_filtered_50"]["file"] in verified:
-        add_level_five(humann_plots["pathway_filtered_50"]["file"], humann_plots["pathway_filtered_50"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["ko_filtered_50"]["file"], humann_plots["ko_filtered_50"]["def"], output, pad, gap=24)
     if is_low_biomass:
         if humann_plots["ko_decontam"]["file"] in verified:
-            add_level_five(humann_plots["ko_decontam"]["file"], humann_plots["ko_decontam"]["def"], output, pad, gap=4)
+            add_level_five(humann_plots["ko_decontam"]["file"], humann_plots["ko_decontam"]["def"], output, pad, gap=24)
         if humann_plots["ko_decontam_50"]["file"] in verified:
-            add_level_five(humann_plots["ko_decontam_50"]["file"], humann_plots["ko_decontam_50"]["def"], output, pad, gap=4)
-    add_spacer(output, num_lines=3)
+            add_level_five(humann_plots["ko_decontam_50"]["file"], humann_plots["ko_decontam_50"]["def"], output, pad, gap=24)
+    add_spacer(output, num_lines=3, gap=2)
 
-    add_level_three("Pathway_abundances/", "Pathway abundances", output, pad)
-    add_level_four(f"{prefix}Pathway-abundances-cpm{suffix}.tsv", "pathway abundances normalized to copies-per-million", output, pad)
-    add_level_four(f"{prefix}Pathway-abundances-grouped-by-taxa{suffix}.tsv", "pathway abundances grouped by taxa", output, pad)
-    add_level_four(f"{prefix}Pathway-abundances{suffix}.tsv", "raw pathway abundance table", output, pad)
-    add_level_four("Counts_Tables/", "pathway abundances count tables", output, pad)
+    add_level_three("Pathway_abundances/", "Pathway abundances", output, pad, gap=2)
+    add_level_four(f"{prefix}Pathway-abundances-cpm{suffix}.tsv", "pathway abundances normalized to copies-per-million", output, pad, gap=2)
+    add_level_four(f"{prefix}Pathway-abundances-grouped-by-taxa{suffix}.tsv", "pathway abundances grouped by taxa", output, pad, gap=2)
+    add_level_four(f"{prefix}Pathway-abundances{suffix}.tsv", "raw pathway abundance table", output, pad, gap=2)
+    add_level_four("Counts_Tables/", "pathway abundances count tables", output, pad, gap=2)
     if read_based_tables["humann_pathabund_filtered"]["file"] in verified:
-        add_level_five(read_based_tables["humann_pathabund_filtered"]["file"], read_based_tables["humann_pathabund_filtered"]["def"], output, pad)
+        add_level_five(read_based_tables["humann_pathabund_filtered"]["file"], read_based_tables["humann_pathabund_filtered"]["def"], output, pad, gap=2)
     if args.sample_type == "low_biomass":
         if read_based_tables["humann_pathabund_decontam_results"]["file"] in verified:
-            add_level_five(read_based_tables["humann_pathabund_decontam_results"]["file"], read_based_tables["humann_pathabund_decontam_results"]["def"], output, pad)
+            add_level_five(read_based_tables["humann_pathabund_decontam_results"]["file"], read_based_tables["humann_pathabund_decontam_results"]["def"], output, pad, gap=2)
         if read_based_tables["humann_pathabund_decontam"]["file"] in verified:
-            add_level_five(read_based_tables["humann_pathabund_decontam"]["file"], read_based_tables["humann_pathabund_decontam"]["def"], output, pad)
-    add_spacer(output, num_lines=4)
+            add_level_five(read_based_tables["humann_pathabund_decontam"]["file"], read_based_tables["humann_pathabund_decontam"]["def"], output, pad, gap=2)
+    add_spacer(output, num_lines=4, gap=2)
 
-    add_level_four("Heatmaps/", "pathways heatmaps", output, pad)
+    add_level_four("Heatmaps/", "pathways heatmaps", output, pad, gap=2)
     if humann_plots["pathway_unfiltered"]["file"] in verified:
-        add_level_five(humann_plots["pathway_unfiltered"]["file"], humann_plots["pathway_unfiltered"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["pathway_unfiltered"]["file"], humann_plots["pathway_unfiltered"]["def"], output, pad, gap=24)
     if humann_plots["pathway_unfiltered_50"]["file"] in verified:
-        add_level_five(humann_plots["pathway_unfiltered_50"]["file"], humann_plots["pathway_unfiltered_50"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["pathway_unfiltered_50"]["file"], humann_plots["pathway_unfiltered_50"]["def"], output, pad, gap=24)
     if humann_plots["pathway_filtered"]["file"] in verified:
-        add_level_five(humann_plots["pathway_filtered"]["file"], humann_plots["pathway_filtered"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["pathway_filtered"]["file"], humann_plots["pathway_filtered"]["def"], output, pad, gap=24)
     if humann_plots["pathway_filtered_50"]["file"] in verified:
-        add_level_five(humann_plots["pathway_filtered_50"]["file"], humann_plots["pathway_filtered_50"]["def"], output, pad, gap=4)
+        add_level_five(humann_plots["pathway_filtered_50"]["file"], humann_plots["pathway_filtered_50"]["def"], output, pad, gap=24)
     if is_low_biomass:
         if humann_plots["pathway_decontam"]["file"] in verified:
-            add_level_five(humann_plots["pathway_decontam"]["file"], humann_plots["pathway_decontam"]["def"], output, pad, gap=4)
+            add_level_five(humann_plots["pathway_decontam"]["file"], humann_plots["pathway_decontam"]["def"], output, pad, gap=24)
         if humann_plots["pathway_decontam_50"]["file"] in verified:
-            add_level_five(humann_plots["pathway_decontam_50"]["file"], humann_plots["pathway_decontam_50"]["def"], output, pad, gap=4)
-    add_spacer(output, num_lines=3)
+            add_level_five(humann_plots["pathway_decontam_50"]["file"], humann_plots["pathway_decontam_50"]["def"], output, pad, gap=24)
+    add_spacer(output, num_lines=3, gap=2)
 
-    add_level_three("Pathway_coverages/", "Pathway coverages", output, pad)
-    add_level_four(f"{prefix}Pathway-coverages-grouped-by-taxa{suffix}.tsv", "pathway coverages grouped by taxa", output, pad, gap=3)
-    add_level_four(f"{prefix}Pathway-coverages{suffix}.tsv", "pathway coverages", output, pad, gap=3)
+    add_level_three("Pathway_coverages/", "Pathway coverages", output, pad, gap=2)
+    add_level_four(f"{prefix}Pathway-coverages-grouped-by-taxa{suffix}.tsv", "pathway coverages grouped by taxa", output, pad, gap=23)
+    add_level_four(f"{prefix}Pathway-coverages{suffix}.tsv", "pathway coverages", output, pad, gap=23)
 
     add_spacer(output)
 

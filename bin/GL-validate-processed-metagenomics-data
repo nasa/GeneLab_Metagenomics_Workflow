@@ -710,7 +710,8 @@ def main():
         f"Gene-level/KO/{output_prefix}Combined-gene-level-KO-function_unfiltered_top_50_heatmap{assay_suffix}.png",
         f"Gene-level/Taxonomy/{output_prefix}Combined-gene-level-taxonomy_filtered_heatmap{assay_suffix}.png",
         f"Gene-level/Taxonomy/{output_prefix}Combined-gene-level-taxonomy_filtered_top_50_heatmap{assay_suffix}.png",
-        f"Gene-level/Taxonomy/{output_prefix}Combined-gene-level-taxonomy_unfiltered_heatmap{assay_suffix}.png"
+        f"Gene-level/Taxonomy/{output_prefix}Combined-gene-level-taxonomy_unfiltered_heatmap{assay_suffix}.png",
+        f"Gene-level/Taxonomy/{output_prefix}Combined-gene-level-taxonomy_unfiltered_top_50_heatmap{assay_suffix}.png"
     ]
     if stype == "low_biomass":
         combined_plots.extend([

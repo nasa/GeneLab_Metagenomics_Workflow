@@ -13,14 +13,24 @@ The current GeneLab metagenomics sequencing data processing pipelines ([Standard
 # NF_MetagenomeSeq Workflow & Subworkflows <!-- omit in toc -->
 ### Resource Requirements <!-- omit in toc -->
 
-The table below details the default maximum resource allocations for individual Nextflow processes.
+The table below details the default maximum resource allocations for individual Nextflow processes used during data processing (not including reference data setup).
 
-| CPU Cores | Memory |
-|--------------------|------------------|
-| 10                 | 500 GB           |
+| Sequencing Technology | Sample Type | Default CPU Cores | Default Memory |
+|------------|-----------|:-----------------:|:--------------:|
+| `illumina` | low-biomass | 20                | 300 GB         | 
+| `illumina` | standard    | 8                 | 100 GB         |
+| `nanopore` | low-biomass | 10                | 100 GB         |
+| `nanopore` | standard    | 10                | 100 GB         |
+
+The Kaiju and Metaphlan database creation can also be resource intensive. Kaiju database creation, in particular, is a particularly long running process and can take up to a week.Maximum resources required for each resource intensive database creation step:
+| Database  | Default CPU Cores | Default Memory |
+|-----------|:-----------------:|:--------------:|
+| Kaiju     | 2                 | 500 GB         |
+| Metaphlan | 8                 | 100 GB         |
+
 
 > [!TIP]
-> These per-process resource allocations are defaults. They can be adjusted by modifying `cpus` and `memory` directives in the  [default.config](config/default.config), [illumina.config](config/illumina.config) and [nanopore.config](config/nanopore.config) configuration files. For more granular information on resource allocation, see the full workflow documentation in [GeneLab_Metagenomics_Workflow_Documentation.md](./GeneLab_Metagenomics_Workflow_Documentation.md)
+> These per-process resource allocations are defaults. They can be adjusted by modifying `cpus` and `memory` directives in the  [default.config](config/default.config), [illumina.config](config/illumina.config) and [nanopore.config](config/nanopore.config) configuration files. For more granular information on resource allocation, see the full workflow documentation in [GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md](./GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md)
 
 
 <br>

@@ -930,9 +930,13 @@ def add_read_based_taxonomy_counts(df: pd.DataFrame, verified_read_based: dict[s
 
     table_dir = f"{output_type}_Outputs-Count_Tables"
     table_files = []
+    tax_tsv_file = ""
     if table_dir in verified_read_based:
         for tablename in verified_read_based[table_dir]:
-            table_files.append(f"{osdr_prefix}{tablename}")
+            if "metaphlan-taxonomy" in tablename:
+                tax_tsv_file = f"{osdr_prefix}{tablename}"
+            else:
+                table_files.append(f"{osdr_prefix}{tablename}")
     else:
         print(f"Read-based processing: Count_Tables folder for {output_type} does not exist.")
 
@@ -940,6 +944,9 @@ def add_read_based_taxonomy_counts(df: pd.DataFrame, verified_read_based: dict[s
 
     # add column to dataframe with same value for all rows
     df = add_parameter_column(df=df, column_name=column_name, value=combined_files)
+
+    if output_type == "Metaphlan" and tax_tsv_file:
+        df = add_parameter_column(df=df, column_name=f"{output_type}_Outputs", value=tax_tsv_file)
     return df
 
 
@@ -1029,6 +1036,34 @@ def add_read_based_humann_output(df: pd.DataFrame, verified_read_based: dict[str
                 plot_files.append(f"{osdr_prefix}{file}")
     else:
         print("Read-based processing: Humann_Outputs Gene-Families files do not exist")
+        
+    # add table column to dataframe with same value for all rows
+    df = add_parameter_column(df=df, column_name=column_name, value=",".join(table_files))
+    # add table column to dataframe with same value for all rows
+    df = add_parameter_column(df=df, column_name=counts_column_name, value=",".join(counts_files))
+    # add table column to dataframe with same value for all rows
+    df = add_parameter_column(df=df, column_name=plots_column_name, value=",".join(plot_files))
+
+    # KO
+    column_name = "Parameter Value[Read-based Processing/Humann Outputs/KO]"
+    counts_column_name = "Parameter Value[Read-based Processing/Humann Outputs/KO/Counts Tables]"
+    plots_column_name = "Parameter Value[Read-based Processing/Humann Outputs/KO/Heatmaps]"
+
+    table_files = []
+    counts_files = []
+    plot_files = []
+
+    if "Humann_Outputs-KO" in verified_read_based:
+        for file in verified_read_based["Humann_Outputs-KO"]:
+            if file.endswith(".tsv"):
+                if 'filtered' in file or 'decontam' in file:
+                    counts_files.append(f"{osdr_prefix}{file}")
+                else:
+                    table_files.append(f"{osdr_prefix}{file}")
+            elif file.endswith(".png"):
+                plot_files.append(f"{osdr_prefix}{file}")
+    else:
+        print("Read-based processing: Humann_Outputs KO files do not exist")
         
     # add table column to dataframe with same value for all rows
     df = add_parameter_column(df=df, column_name=column_name, value=",".join(table_files))
