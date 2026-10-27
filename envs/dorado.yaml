@@ -1,0 +1,6 @@
+name: dorado
+channels:
+  - conda-forge
+  - yangmingsi
+dependencies:
+  - dorado=1.3.0

@@ -1,0 +1,8 @@
+name: humann3
+channels:
+    - conda-forge
+    - bioconda
+    - biobakery
+dependencies:
+    - humann=3.9
+    - metaphlan=4.1.0

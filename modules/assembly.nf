@@ -1,0 +1,447 @@
+#!/usr/bin/env nextflow
+nextflow.enable.dsl = 2
+//params.paired = false
+//params.max_mem = 100e9
+
+/**************************************************************************************** 
+**************************  Sequence assembly and summary *******************************
+****************************************************************************************/
+
+/*
+ * ========================================================================================
+ * PROCESS: ASSEMBLE
+ * ========================================================================================
+ *
+ * SUMMARY:
+ *   Assemble sample reads with megahit
+ *
+ * INPUTS:
+ *   1. tuple: tuple val(sample_id), path(reads), val(isPaired)
+ *      Cardinality: one
+ *      Description: Tuple input combining multiple channel elements
+ *                 - sample_id: string specifying the input sample name
+ *                 - reads: path to sample fastq reads
+ *                 - isPaired: Boolean specifying whether input reads are paired or not 
+ *
+ * OUTPUTS:
+ *   1. tuple: tuple val(sample_id), path("${sample_id}_final.contigs.fa") (emit: contigs)
+ *
+ *   2. path: ${sample_id}-assembly.log (emit: log)
+ *
+ *   3. path: versions.txt (emit: version)
+ *
+ * SOFTWARE & CONTAINERS:
+ *   Primary Tool: MEGAHIT
+ *   Container: [Defined in config/illumina.config]
+ *   Conda: envs/megahit.yaml
+ *
+ * RESOURCE REQUIREMENTS:
+ *   - CPU cores: task.cpus 
+ *   - Memory: task.memory # value of params.max_mem
+ *
+ * ========================================================================================
+ */
+
+// This process handles running the assembly for each individual sample.
+process ASSEMBLE {
+
+    tag "Assembling ${sample_id}-s reads using megahit..."
+
+    input:
+        tuple val(sample_id), path(reads), val(isPaired)
+    output:
+        tuple val(sample_id), path("${sample_id}_final.contigs.fa"), emit: contigs
+        path("${sample_id}-assembly.log"), emit: log
+        path("versions.txt"), emit: version
+    script:
+        """
+        # Removing output directory if exists already but process still needs to be 
+        # run (because there is no --force option to megahit i don't think):        
+        [ -d ${sample_id}-megahit-out/ ] && rm -rf ${sample_id}-megahit-out/
+
+        if [ ${isPaired} == true ]; then
+       
+            BASENAME_FORWARD=`basename -s '.gz' ${reads[0]}`
+            BASENAME_REVERSE=`basename -s '.gz' ${reads[1]}` 
+
+            zcat  ${reads[0]} > \${BASENAME_FORWARD}
+            zcat  ${reads[1]} > \${BASENAME_REVERSE}
+
+            megahit -1 \${BASENAME_FORWARD} -2 \${BASENAME_REVERSE} \\
+               -m ${params.max_mem} -t ${task.cpus} \\
+               --min-contig-len 500 -o ${sample_id}-megahit-out > ${sample_id}-assembly.log 2>&1
+         
+        else
+
+            BASENAME=`basename -s '.gz' ${reads[0]}`
+            zcat ${reads[0]} > \${BASENAME}
+            megahit -r \${BASENAME} -m ${params.max_mem} -t  ${task.cpus} \\
+                --min-contig-len 500 -o ${sample_id}-megahit-out > ${sample_id}-assembly.log 2>&1
+        fi
+        
+        mv ${sample_id}-megahit-out/final.contigs.fa ${sample_id}_final.contigs.fa
+        megahit -v > versions.txt
+        """
+}
+
+
+/*
+ * ========================================================================================
+ * PROCESS: FLYE
+ * ========================================================================================
+ *
+ * SUMMARY:
+ *   Assemble sample reads with flye
+ *
+ * INPUTS:
+ *   1. tuple: tuple val(sample_id), path(reads), val(isPaired)
+ *      Cardinality: one
+ *      Description: Tuple input combining multiple channel elements.
+ *                 - sample_id: string specifying the input sample name
+ *                 - reads: path to sample fastq reads
+ *                 - isPaired: Boolean specifying whether input reads are paired or not 
+ *
+ * OUTPUTS:
+ *   1. tuple: tuple val(sample_id), path("${sample_id}-assembly.fasta") (emit: contigs)
+ *
+ *   2. tuple: tuple val(sample_id), path("${sample_id}-assembly.log") (emit: log)
+ *
+ *   3. path: versions.txt (emit: version)
+ *
+ * SOFTWARE & CONTAINERS:
+ *   Primary Tool: Flye
+ *   Container: [Defined in config/nanopore.config]
+ *   Conda: envs/flye.yaml
+ *   Labels: flye, assembly
+ *
+ * RESOURCE REQUIREMENTS:
+ *   - CPU cores: task.cpus
+ *   - Memory: task.memory
+ *
+ * ========================================================================================
+ */
+
+process FLYE {
+
+    tag "Assembling ${sample_id}-s reads.."
+    label "flye"
+    label "assembly"
+
+    input:
+    tuple val(sample_id), path(reads), val(isPaired)
+
+    output:
+    tuple val(sample_id), path("${sample_id}-assembly.fasta"), emit: contigs
+    tuple val(sample_id), path("${sample_id}-assembly.log"), emit: log
+    path("versions.txt"), emit: version
+
+    script:
+    """
+    flye --meta \\
+        --out-dir . \\
+        --threads ${task.cpus} \\
+        --nano-hq  ${reads}  || touch assembly.fasta 
+
+    mv assembly.fasta ${sample_id}-assembly.fasta
+    mv flye.log ${sample_id}-assembly.log
+
+    VERSION=`flye --version`
+    echo "flye \${VERSION}" > versions.txt
+    """
+}
+
+
+/*
+ * ========================================================================================
+ * PROCESS: POLISH_ASSEMBLY
+ * ========================================================================================
+ *
+ * SUMMARY:
+ *   Polish sample assembly with medaka
+ *
+ * INPUTS:
+ *   1. tuple: tuple val(sample_id), path(assembly), path(reads), val(isPaired)
+ *      Cardinality: one
+ *      Description: Tuple input combining multiple channel elements
+ *                 - sample_id: string specifying the input sample name
+ *                 - assembly: path to sample assembly/contigs
+ *                 - reads: path to sample fastq reads
+ *                 - isPaired: Boolean specifying whether input reads are paired or not 
+ *
+ * OUTPUTS:
+ *   1. tuple: tuple val(sample_id), path("${sample_id}_polished.fasta") (emit: contigs)
+ *
+ *   2. tuple: tuple val(sample_id), path("${sample_id}-medaka.log") (emit: log)
+ *
+ *   3. path: versions.txt (emit: version)
+ *
+ * SOFTWARE & CONTAINERS:
+ *   Primary Tool: Medaka
+ *   Container: [Defined in config/nanopore.config]
+ *   Conda: envs/medaka.yaml
+ *
+ * RESOURCE REQUIREMENTS:
+ *   - CPU cores: task.cpus
+ *   - Memory: task.memory
+ *
+ * ========================================================================================
+ */
+
+// Assembly polishing with medaka
+process POLISH_ASSEMBLY {
+
+    tag "Polishing ${sample_id}-s assembly with medaka.."
+
+    input:
+    tuple val(sample_id), path(assembly), path(reads), val(isPaired)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_polished.fasta"), emit: contigs
+    tuple val(sample_id), path("${sample_id}-medaka.log"), emit: log
+    path("versions.txt"), emit: version
+
+    script:
+    """
+    # Check if contig assembly was successful before attempting to polish with medaka
+    if [ -s ${assembly} ]; then
+
+        medaka_consensus \\
+            -t ${task.cpus} \\
+            -i ${reads} \\
+            -d ${assembly} \\
+            -o .  >  ${sample_id}-medaka.log
+
+    else 
+
+        printf "${sample_id}\\tNo contig assembled, hence, contig polishing wasn't performed.\\n"
+        touch consensus.fasta ${sample_id}-medaka.log
+    
+   fi
+    mv consensus.fasta ${sample_id}_polished.fasta
+
+    VERSION=`medaka --version 2>&1 | sed 's/medaka //g'`
+    echo "medaka \${VERSION}" > versions.txt
+    """
+}
+
+/*
+ * ========================================================================================
+ * PROCESS: SPADES
+ * ========================================================================================
+ *
+ * SUMMARY:
+ *   Assemble sample reads with spades
+ *
+ * INPUTS:
+ *   1. tuple: tuple val(sample_id), path(reads), val(isPaired)
+ *      Cardinality: one
+ *      Description: Tuple input combining multiple channel elements
+ *                 - sample_id: string specifying the input sample name
+ *                 - reads: path to sample fastq reads
+ *                 - isPaired: Boolean specifying whether input reads are paired or not 
+ *
+ *   2. val: type
+ *      Cardinality: one
+ *      Description: Parameter value: the technology type, one of illumina, pacbio or nanopore
+ *
+ * OUTPUTS:
+ *   1. tuple: tuple val(sample_id), path('*.scaffolds.fa'), optional:true (emit: scaffolds) [OPTIONAL]
+ *
+ *   2. tuple: tuple val(sample_id), path('*warnings.log'), optional:true (emit: warnings) [OPTIONAL]
+ *
+ *   3. tuple: tuple val(sample_id), path('*spades.log') (emit: log)
+ *
+ *   4. path: versions.txt (emit: version)
+ *
+ * SOFTWARE & CONTAINERS:
+ *   Primary Tool: SPAdes
+ *   Container: [Defined in config/illumina.config]
+ *   Conda: envs/spades.yaml
+ *
+ * RESOURCE REQUIREMENTS:
+ *   - CPU cores: task.cpus
+ *   - memory: task.memory
+ *
+ * ========================================================================================
+ */
+
+process SPADES {
+
+    tag "Assembling ${sample_id}-s reads.."
+
+    input:
+        tuple val(sample_id), path(reads), val(isPaired) 
+        val(type) // illumina or pacbio or nanopore
+
+    output:
+    tuple val(sample_id), path('*.scaffolds.fa'), optional:true, emit: scaffolds
+    tuple val(sample_id), path('*warnings.log'), optional:true, emit: warnings
+    tuple val(sample_id), path('*spades.log'), emit: log
+    path("versions.txt"), emit: version
+
+    script:
+        def maxmem = task.memory.toGiga()
+    """
+    if [ ${type} ==  "illumina" ]; then
+
+         if [ isPaired == 'true' ]; then
+
+              INPUT=' -1 ${reads[0]} -2 ${reads[1]}'
+         else
+
+              INPUT=' -s ${reads[0]}'
+         fi
+
+    fi
+
+ 
+    if [ ${type} ==  "pacbio" ]; then
+
+       INPUT=' --pacbio ${reads[0]}' 
+   
+    fi
+
+
+    if [ ${type} ==  "nanopore" ]; then
+
+       INPUT=' --nanopore ${reads[0]}'
+
+    fi    
+
+
+    spades.py --meta --threads ${task.cpus} --memory ${maxmem} \${INPUT} -o .
+
+
+    # Renaming output files    
+    mv spades.log ${sample_id}-spades.log
+
+    if [ -f scaffolds.fasta ]; then
+        mv scaffolds.fasta ${sample_id}.scaffolds.fa
+    fi
+
+    if [ -f warnings.log ]; then
+        mv warnings.log ${sample_id}-warnings.log
+    fi
+
+ 
+    VERSION=`spades.py --version 2>&1 | sed -n 's/^.*SPAdes genome assembler v//p'`
+
+    echo "spades \${VERSION}" > versions.txt
+
+    """
+}
+
+/*
+ * ========================================================================================
+ * PROCESS: RENAME_HEADERS
+ * ========================================================================================
+ *
+ * SUMMARY:
+ *   Rename sample assembly fasta headers
+ *
+ * INPUTS: 
+ *   1. tuple: tuple val(sample_id), path(assembly)
+ *      Cardinality: one
+ *      Description: Tuple input combining multiple channel elements
+ *                 - sample_id: string specifying the input sample name
+ *                 - assembly: path to sample assembly/contigs 
+ *
+ * OUTPUTS:
+ *   1. tuple: tuple val(sample_id), path("${sample_id}-assembly${params.assay_suffix}.fasta") (emit: contigs)
+ *
+ *   2. path: versions.txt (emit: version)
+ *
+ *   3. path: Failed-assemblies.tsv (emit: failed_assembly) [OPTIONAL]
+ *
+ * SOFTWARE & CONTAINERS:
+ *   Container: [Defined in config/default.config]
+ *   Conda: envs/bit.yaml
+ *   Labels: bit, assembly
+ *
+ * RESOURCE REQUIREMENTS:
+ *   - CPU cores: task.cpus
+ *   - Memory: task.memory
+ *
+ * ========================================================================================
+ */
+
+process RENAME_HEADERS {
+
+    tag "Renaming ${sample_id}-s assembly fasta file-s headers..."
+    label "bit"
+    label "assembly"
+
+    input:
+        tuple val(sample_id), path(assembly)
+    output:
+        tuple val(sample_id), path("${sample_id}-assembly${params.assay_suffix}.fasta"), emit: contigs
+        path("versions.txt"), emit: version
+        path("Failed-assemblies.tsv"), optional: true, emit: failed_assembly
+    script:
+        """
+        bit-rename-fasta-headers -i ${assembly} \\
+                                 -w c_${sample_id} \\
+                                 -o ${sample_id}-assembly${params.assay_suffix}.fasta
+
+        # Checking the assembly produced anything (megahit can run, produce 
+        # the output fasta, but it will be empty if no contigs were assembled)
+        if [ ! -s ${sample_id}-assembly${params.assay_suffix}.fasta ]; then
+            printf "${sample_id}\\tNo contigs assembled\\n" > Failed-assemblies.tsv
+        fi
+        bit-version |grep "Bioinformatics Tools"|sed -E 's/^\\s+//' > versions.txt
+        """
+}
+
+
+/*
+ * ========================================================================================
+ * PROCESS: SUMMARIZE_ASSEMBLIES
+ * ========================================================================================
+ *
+ * SUMMARY:
+ *   Summarize all sample assemblies. Generate all sort of assembly statistics such as N50
+ *
+ * INPUTS:
+ *   1. path: assemblies
+ *      Cardinality: one
+ *      Description: Input files: path to list of sample assemblies
+ *
+ * OUTPUTS:
+ *   1. path: ${params.additional_filename_prefix}assembly-summaries${params.assay_suffix}.tsv (emit: summary)
+ *
+ *   2. path: versions.txt (emit: version)
+ *
+ * SOFTWARE & CONTAINERS:
+ *   Container: [Defined in config/default.config]
+ *   Conda: envs/bit.yaml
+ *   Labels: bit, assembly
+ *
+ * RESOURCE REQUIREMENTS:
+ *   - CPU cores: task.cpus
+ *   - Memory: task.memory
+ *
+ * ========================================================================================
+ */
+
+// This process summarizes and reports general stats for all individual sample assemblies in one table.
+process SUMMARIZE_ASSEMBLIES {
+
+    tag "Generating a summary of all the assemblies..."
+    label "bit"
+    label "assembly"
+
+    input:
+        path(assemblies)      
+    output:
+        path("${params.additional_filename_prefix}assembly-summaries${params.assay_suffix}.tsv"), emit: summary
+        path("versions.txt"), emit: version
+    script:
+        """
+        bit-summarize-assembly \\
+                 -o ${params.additional_filename_prefix}assembly-summaries${params.assay_suffix}.tsv \\
+                 ${assemblies}
+        bit-version |grep "Bioinformatics Tools"|sed -E 's/^\\s+//' > versions.txt
+        """
+}
+
+
