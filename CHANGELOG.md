@@ -6,7 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.0.0-beta](https://github.com/nasa/GeneLab_Metagenomics_Workflow/tree/NF_MetagenomeSeq_1.0.0-beta/)
+## [v1.0.0](https://github.com/nasa/GeneLab_Metagenomics_Workflow/releases/tag/v1.0.0)
+
+### Added 
+- Post-processing workflow
+  - automated validation to check file outputs
+  - generate processed data README based on file validation results 
+  - remove file paths from outputs to prepare files for publishing in OSDR
+  - automatically generate processed data protocol based on run parameters
+  - generate updated assay table for publishing in OSDR
+- Updated documentation
+
+### Fixed
+- output file prefix and suffix support
+
+## [v1.0.0-beta](https://github.com/nasa/GeneLab_Metagenomics_Workflow/releases/tag/v1.0.0-beta/)
 
 This is the initial beta release of the NF_MetagenomeSeq workflow which is an extension of the previous
 [NF_MGIllumina workflow](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Illumina/Workflow_Documentation/NF_MGIllumina/).
