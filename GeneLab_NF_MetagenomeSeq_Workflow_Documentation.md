@@ -5,147 +5,147 @@
 The **GeneLab Metagenomics Sequencing Data Processing Workflow** is a comprehensive Nextflow DSL2 pipeline developed by NASA's GeneLab (part of the Open Science Data Repository - OSDR) for processing both Illumina short-read and Oxford Nanopore long-read metagenomics sequencing data. This workflow implements NASA's standardized metagenomics data processing pipelines for both standard and low biomass samples.
 
 **Repository**: https://github.com/nasa/GeneLab_Metagenomics_Workflow  
-**Branch**: DEV  
-**Version**: 1.0.0-beta  
+**Branch**: main  
+**Version**: 1.0.0  
 **Author**: Olabiyi Aderemi Obayomi  
 **Nextflow Version**: 24.10.5-0
 
 ---
 
-- [GeneLab Metagenomics Workflow Documentation](#genelab-metagenomics-workflow-documentation)
-  - [Overview](#overview)
-  - [Workflow Capabilities](#workflow-capabilities)
-    - [Supported Technologies](#supported-technologies)
-    - [Sample Types](#sample-types)
-    - [Analysis Modes](#analysis-modes)
-  - [Workflow Architecture](#workflow-architecture)
-    - [Main Entry Point](#main-entry-point)
-    - [Technology-Specific Workflows](#technology-specific-workflows)
-    - [Core Processing Modules (modules/)](#core-processing-modules-modules)
-      - [Quality Control \& Preprocessing](#quality-control--preprocessing)
-      - [Read-Based Analysis (`read_based_processing.nf`)](#read-based-analysis-read_based_processingnf)
-      - [Assembly-Based Analysis (`assembly_based_processing.nf`)](#assembly-based-analysis-assembly_based_processingnf)
-      - [Supporting Modules](#supporting-modules)
-  - [Input Requirements](#input-requirements)
-    - [Input File Formats](#input-file-formats)
-    - [Illumina Inputs](#illumina-inputs)
-      - [Illumina Standard Paired-End](#illumina-standard-paired-end)
-      - [Illumina Standard Single-End](#illumina-standard-single-end)
-      - [Illumina Low Biomass (adds NTC and concentration columns)](#illumina-low-biomass-adds-ntc-and-concentration-columns)
-    - [Nanopore Inputs](#nanopore-inputs)
-      - [Nanopore Low Biomass Single FASTQ](#nanopore-low-biomass-single-fastq)
-      - [Nanopore Low Biomass Multiple FASTQs](#nanopore-low-biomass-multiple-fastqs)
-      - [Nanopore Low Biomass POD5](#nanopore-low-biomass-pod5)
-    - [GeneLab Accession Support](#genelab-accession-support)
-  - [Key Parameters](#key-parameters)
-    - [Required Parameters](#required-parameters)
-    - [Input Selection (Choose ONE)](#input-selection-choose-one)
-    - [Workflow Control](#workflow-control)
-    - [Assembly \& Binning Parameters](#assembly--binning-parameters)
-    - [MAG Quality Thresholds](#mag-quality-thresholds)
-    - [Host/Contaminant Removal](#hostcontaminant-removal)
-  - [Database Management](#database-management)
-    - [Read-Based Analysis Databases](#read-based-analysis-databases)
-    - [Assembly-Based Analysis Databases](#assembly-based-analysis-databases)
-    - [Database Root Directory](#database-root-directory)
-  - [Usage Examples](#usage-examples)
-    - [Example 1: Illumina Paired-End Standard Sample (Slurm + Singularity)](#example-1-illumina-paired-end-standard-sample-slurm--singularity)
-    - [Example 2: Low Biomass Illumina with Conda (Local Execution)](#example-2-low-biomass-illumina-with-conda-local-execution)
-    - [Example 3: GeneLab Accession with Pre-existing Databases](#example-3-genelab-accession-with-pre-existing-databases)
-    - [Example 4: Low Biomass Nanopore Long-Reads with Host Removal](#example-4-low-biomass-nanopore-long-reads-with-host-removal)
-    - [Example 5: Assembly-Based Only with Custom Resources](#example-5-assembly-based-only-with-custom-resources)
-  - [Output Structure](#output-structure)
-  - [Key Output Files](#key-output-files)
-    - [Read-Based Analysis](#read-based-analysis)
-      - [Taxonomic Classification](#taxonomic-classification)
-      - [Functional Analysis](#functional-analysis)
-    - [Assembly-Based Analysis](#assembly-based-analysis)
-      - [Assemblies \& Genes](#assemblies--genes)
-      - [Annotation \& Taxonomy](#annotation--taxonomy)
-      - [Binning \& MAGs](#binning--mags)
-      - [Assembly-based summary](#assembly-based-summary)
-  - [Workflow Logic](#workflow-logic)
-    - [Main Workflow Execution Flow](#main-workflow-execution-flow)
-    - [Illumina Workflow Details](#illumina-workflow-details)
-    - [Nanopore Workflow Details](#nanopore-workflow-details)
-    - [Read-Based Processing Details](#read-based-processing-details)
-    - [Assembly-Based Processing Details](#assembly-based-processing-details)
-  - [Configuration Files](#configuration-files)
-    - [`config/params.config`](#configparamsconfig)
-    - [`config/default.config`](#configdefaultconfig)
-    - [`config/illumina.config`](#configilluminaconfig)
-    - [`config/nanopore.config`](#confignanoporeconfig)
-    - [`config/profiles.config`](#configprofilesconfig)
-  - [Container \& Environment Management](#container--environment-management)
-    - [Singularity Containers (Recommended)](#singularity-containers-recommended)
-    - [Docker Support](#docker-support)
-    - [Conda Environments](#conda-environments)
-  - [Resource Requirements](#resource-requirements)
-    - [Minimum Recommendations](#minimum-recommendations)
-    - [High-Memory Processes](#high-memory-processes)
-  - [Advanced Features](#advanced-features)
-    - [GeneLab Integration](#genelab-integration)
-    - [Low Biomass Sample Processing](#low-biomass-sample-processing)
-    - [Custom Genome Mapping](#custom-genome-mapping)
-    - [Monitoring with Seqera Platform](#monitoring-with-seqera-platform)
-  - [Troubleshooting](#troubleshooting)
-    - [Common Issues](#common-issues)
-      - [1. Database Download Failures](#1-database-download-failures)
-      - [2. Out of Memory Errors](#2-out-of-memory-errors)
-      - [3. GTDB-Tk Memory Issues](#3-gtdb-tk-memory-issues)
-      - [4. Process Failures](#4-process-failures)
-  - [Software Dependencies](#software-dependencies)
-    - [Quality Control](#quality-control)
-    - [Taxonomic Classification](#taxonomic-classification-1)
-    - [Functional Annotation](#functional-annotation)
-    - [Assembly \& Binning](#assembly--binning)
-    - [Mapping \& Coverage](#mapping--coverage)
-    - [Visualization](#visualization)
-  - [Citation \& References](#citation--references)
-    - [Pipeline Documents](#pipeline-documents)
-  - [Support \& Contact](#support--contact)
-  - [Changelog](#changelog)
-    - [Version 1.0.0-beta](#version-100-beta)
-  - [License](#license)
+- [Workflow Capabilities](#workflow-capabilities)
+  - [Supported Technologies](#supported-technologies)
+  - [Sample Types](#sample-types)
+  - [Analysis Modes](#analysis-modes)
+- [Workflow Architecture](#workflow-architecture)
+  - [Main Processing Entry Point](#main-processing-entry-point)
+  - [Technology-Specific Workflows](#technology-specific-workflows)
+  - [Post-processing Workflow](#post-processing-workflow)
+  - [Core Processing Modules (modules/)](#core-processing-modules-modules)
+    - [Quality Control \& Pre-processing](#quality-control--pre-processing)
+    - [Read-Based Analysis (read\_based\_processing.nf)](#read-based-analysis-read_based_processingnf)
+    - [Assembly-Based Analysis (assembly\_based\_processing.nf)](#assembly-based-analysis-assembly_based_processingnf)
+    - [Supporting Modules](#supporting-modules)
+- [Input Requirements](#input-requirements)
+  - [Input File Formats](#input-file-formats)
+  - [Illumina Inputs](#illumina-inputs)
+    - [Illumina Standard Paired-End](#illumina-standard-paired-end)
+    - [Illumina Standard Single-End](#illumina-standard-single-end)
+    - [Illumina Low Biomass (adds NTC and concentration columns)](#illumina-low-biomass-adds-ntc-and-concentration-columns)
+  - [Nanopore Inputs](#nanopore-inputs)
+    - [Nanopore Low Biomass Single FASTQ](#nanopore-low-biomass-single-fastq)
+    - [Nanopore Low Biomass Multiple FASTQs](#nanopore-low-biomass-multiple-fastqs)
+    - [Nanopore Low Biomass POD5](#nanopore-low-biomass-pod5)
+  - [GeneLab Accession Support](#genelab-accession-support)
+- [Key Parameters](#key-parameters)
+  - [Required Parameters](#required-parameters)
+  - [Input Selection (Choose ONE)](#input-selection-choose-one)
+  - [Workflow Control](#workflow-control)
+  - [Assembly \& Binning Parameters](#assembly--binning-parameters)
+  - [MAG Quality Thresholds](#mag-quality-thresholds)
+  - [Host/Contaminant Removal](#hostcontaminant-removal)
+- [Database Management](#database-management)
+  - [Read-Based Analysis Databases](#read-based-analysis-databases)
+  - [Assembly-Based Analysis Databases](#assembly-based-analysis-databases)
+  - [Database Root Directory](#database-root-directory)
+- [Usage Examples](#usage-examples)
+  - [Example 1: Illumina Paired-End Standard Sample (Slurm + Singularity)](#example-1-illumina-paired-end-standard-sample-slurm--singularity)
+  - [Example 2: Low Biomass Illumina with Conda (Local Execution)](#example-2-low-biomass-illumina-with-conda-local-execution)
+  - [Example 3: GeneLab Accession with Pre-existing Databases](#example-3-genelab-accession-with-pre-existing-databases)
+  - [Example 4: Low Biomass Nanopore Long-Reads with Host Removal](#example-4-low-biomass-nanopore-long-reads-with-host-removal)
+  - [Example 5: Assembly-Based Only with Custom Resources](#example-5-assembly-based-only-with-custom-resources)
+- [Output Structure](#output-structure)
+- [Key Output Files](#key-output-files)
+  - [Read-Based Analysis](#read-based-analysis)
+    - [Taxonomic Classification](#taxonomic-classification)
+    - [Functional Analysis](#functional-analysis)
+  - [Assembly-Based Analysis](#assembly-based-analysis)
+    - [Assemblies \& Genes](#assemblies--genes)
+    - [Annotation \& Taxonomy](#annotation--taxonomy)
+    - [Binning \& MAGs](#binning--mags)
+    - [Assembly-based summary](#assembly-based-summary)
+- [Workflow Logic](#workflow-logic)
+  - [Main Workflow Execution Flow](#main-workflow-execution-flow)
+  - [Illumina Workflow Execution Flow](#illumina-workflow-execution-flow)
+  - [Nanopore Workflow Execution Flow](#nanopore-workflow-execution-flow)
+  - [Read-Based Processing Execution Flow](#read-based-processing-execution-flow)
+  - [Assembly-Based Processing Execution Flow](#assembly-based-processing-execution-flow)
+- [Configuration Files](#configuration-files)
+  - [`config/params.config`](#configparamsconfig)
+  - [`config/default.config`](#configdefaultconfig)
+  - [`config/illumina.config`](#configilluminaconfig)
+  - [`config/nanopore.config`](#confignanoporeconfig)
+  - [`config/profiles.config`](#configprofilesconfig)
+- [Container \& Environment Management](#container--environment-management)
+  - [Singularity Containers (Recommended)](#singularity-containers-recommended)
+  - [Docker Support](#docker-support)
+  - [Conda Environments](#conda-environments)
+- [Resource Requirements](#resource-requirements)
+  - [Minimum Recommendations](#minimum-recommendations)
+  - [High-Memory Processes](#high-memory-processes)
+- [Advanced Features](#advanced-features)
+  - [GeneLab Integration](#genelab-integration)
+  - [Low Biomass Sample Processing](#low-biomass-sample-processing)
+  - [Custom Genome Mapping](#custom-genome-mapping)
+  - [Monitoring with Seqera Platform](#monitoring-with-seqera-platform)
+- [Troubleshooting](#troubleshooting)
+  - [Common Issues](#common-issues)
+    - [1. Database Download Failures](#1-database-download-failures)
+    - [2. Out of Memory Errors](#2-out-of-memory-errors)
+    - [3. GTDB-Tk Memory Issues](#3-gtdb-tk-memory-issues)
+    - [4. Process Failures](#4-process-failures)
+- [Software Dependencies](#software-dependencies)
+  - [Quality Control](#quality-control)
+  - [Taxonomic Classification](#taxonomic-classification-1)
+  - [Functional Annotation](#functional-annotation)
+  - [Assembly \& Binning](#assembly--binning)
+  - [Mapping \& Coverage](#mapping--coverage)
+  - [Visualization](#visualization)
+- [Citation \& References](#citation--references)
+  - [Pipeline Documents](#pipeline-documents)
+- [Support \& Contact](#support--contact)
 
 
 ---
 ## Workflow Capabilities
 
 ### Supported Technologies
-- **Illumina**: Short-read sequencing (Illumina paired-end and single-end data)
-- **Nanopore**: Long-read sequencing (Oxford Nanopore Technologies data)
+- `illumina`: Short-read sequencing (Illumina paired-end and single-end data)
+- `nanopore`: Long-read sequencing (Oxford Nanopore Technologies data)
 
 ### Sample Types
-- **Standard**: Traditional metagenomics samples
-- **Low Biomass**: Samples with limited microbial material requiring specialized processing (e.g., contaminant removal using negative controls)
+- `standard`: Traditional metagenomics samples
+- `low_biomass`: Samples with limited microbial material requiring specialized processing (e.g., contaminant removal using negative controls)
 
 ### Analysis Modes
-1. **Read-based analysis**: Taxonomic and functional profiling directly from reads
-2. **Assembly-based analysis**: Genome assembly, binning, and annotation
-3. **Both**: Combined read-based and assembly-based workflows (default)
+"assembly-based", "read-based", or "both"
+1. `read-based`: Taxonomic and functional profiling directly from reads
+2. `assembly-based`: Genome assembly, binning, and annotation
+3. `both`: Run both read-based and assembly-based workflows (default)
 
 ---
 
 ## Workflow Architecture
 
-### Main Entry Point
-- **`main.nf`**: Primary workflow script that orchestrates the entire pipeline
+### Main Processing Entry Point
+- [main.nf](./main.nf): Primary workflow script that orchestrates the entire pipeline
 
 ### Technology-Specific Workflows
-1. **`workflows/illumina.nf`**: Illumina short-read processing
-2. **`workflows/nanopore.nf`**: Oxford Nanopore long-read processing
-3. **`workflows/post_processing.nf`**: Post-processing and reporting
+1. [workflows/illumina.nf](workflows/illumina.nf): Illumina short-read processing
+2. [workflows/nanopore.nf](workflows/nanopore.nf): Oxford Nanopore long-read processing
 
-### Core Processing Modules (modules/)
+### Post-processing Workflow
+[post_processing.nf](./post_processing.nf): Post-processing, validation, and reporting 
 
-#### Quality Control & Preprocessing
-- **`quality_assessment.nf`**: FastQC, FASTP trimming/filtering, Filtlong filtering, PoreChop trimming,  MultiQC reporting etc
-- **`remove_contaminant.nf`**: Low biomass contaminant removal from negative controls
-- **`remove_host.nf`**: Host sequence removal using Kraken2
-- **`demultiplexing.nf`**: Barcode demultiplexing for Nanopore data
+---
+### Core Processing Modules ([modules/](./modules/))
 
-#### Read-Based Analysis (`read_based_processing.nf`)
+#### Quality Control & Pre-processing
+- [quality_assessment.nf](./modules/quality_assessment.nf): FastQC, FASTP trimming/filtering, Filtlong filtering, PoreChop trimming,  MultiQC reporting etc
+- [remove_contaminant.nf](./modules/remove_contaminant.nf): Low biomass contaminant removal from negative controls
+- [remove_host.nf](./modules/remove_host.nf): Host sequence removal using Kraken2
+- [demultiplexing.nf](./modules/demultiplexing.nf): Barcode demultiplexing for Nanopore data
+
+#### Read-Based Analysis ([read_based_processing.nf](./modules/read_based_processing.nf))
 - **Taxonomic classification**:
   - Metaphlan4 (Illumina only)
   - Kraken2 (standard and PlusPFP databases)
@@ -156,7 +156,7 @@ The **GeneLab Metagenomics Sequencing Data Processing Workflow** is a comprehens
   - KEGG Ortholog (KO) annotation
 - **Visualization**: Krona plots, heatmaps, barplots
 
-#### Assembly-Based Analysis (`assembly_based_processing.nf`)
+#### Assembly-Based Analysis ([assembly_based_processing.nf](./modules/assembly_based_processing.nf))
 - **Assembly**:
   - MEGAHIT (Illumina)
   - Flye + Medaka polishing (Nanopore)
@@ -171,12 +171,12 @@ The **GeneLab Metagenomics Sequencing Data Processing Workflow** is a comprehens
 - **Visualization**: Heatmaps
 
 #### Supporting Modules
-- **`database_creation.nf`**: Automatic database download and setup
-- **`create_runsheet.nf`**: GeneLab accession metadata retrieval
-- **`downstream_analysis.nf`**: Statistical filtering, visualization, decontamination
-- **`visualize_taxonomy.nf`**: Krona report generation
-- **`genome_mapping.nf`**: Custom genome alignment
-- **`genelab.nf`**: GeneLab-specific formatting and outputs
+- [database_creation.nf](./modules/database_creation.nf): Automatic database download and setup
+- [create_runsheet.nf](./modules/create_runsheet.nf): GeneLab accession metadata retrieval
+- [downstream_analysis.nf](./modules/downstream_analysis.nf): Statistical filtering, visualization, decontamination
+- [visualize_taxonomy.nf](./modules/visualize_taxonomy.nf): Krona report generation
+- [genome_mapping.nf](./modules/genome_mapping.nf): Custom genome alignment
+- [genelab.nf](./modules/genelab.nf): GeneLab-specific formatting and outputs
 
 ---
 
@@ -253,11 +253,11 @@ Instead of providing an input file, you can directly specify a GeneLab accession
 
 ### Required Parameters
 
-| Parameter       | Description           | Options                                                                      |
-| --------------- | --------------------- | ---------------------------------------------------------------------------- |
-| `--technology`  | Sequencing platform   | `illumina`, `nanopore`                                                       |
-| `--sample_type` | Sample biomass level  | `standard`, `low_biomass`                                                    |
-| `-profile`      | Execution environment | `slurm`, `singularity`, `docker`, `conda` (can combine: `slurm,singularity`) |
+| Parameter       | Description           | Options                                                                           |
+| --------------- | --------------------- | --------------------------------------------------------------------------------- |
+| `--technology`  | Sequencing platform   | `illumina`, `nanopore`                                                            |
+| `--sample_type` | Sample biomass level  | `standard`, `low_biomass`                                                         |
+| `-profile`      | Execution environment | `slurm`, `singularity`, `docker`, `conda` (can combine: e.g. `slurm,singularity`) |
 
 ### Input Selection (Choose ONE)
 
@@ -304,7 +304,7 @@ Instead of providing an input file, you can directly specify a GeneLab accession
 
 ## Database Management
 
-The workflow can **automatically download and set up** required databases if not provided. Database paths are specified via parameters:
+The workflow can **automatically download and set up** required databases if not provided. Database download/creation can be resource intensive and it is usually better to use a previously cached reference if possible. Database paths are specified via parameters:
 
 ### Read-Based Analysis Databases
 
@@ -319,11 +319,11 @@ The workflow can **automatically download and set up** required databases if not
 
 ### Assembly-Based Analysis Databases
 
-| Database   | Parameter         | Auto-download               |
-| ---------- | ----------------- | --------------------------- |
-| CAT        | `--cat_db`        | ✅ Yes (via `--CAT_DB_LINK`) |
+| Database  | Parameter         | Auto-download               |
+| --------- | ----------------- | --------------------------- |
+| CAT       | `--cat_db`        | ✅ Yes (via `--CAT_DB_LINK`) |
 | KoFamScan | `--ko_db_dir`     | ✅ Yes                       |
-| GTDB-Tk    | `--gtdbtk_db_dir` | ✅ Yes (via `--GTDBTK_LINK`) |
+| GTDB-Tk   | `--gtdbtk_db_dir` | ✅ Yes (via `--GTDBTK_LINK`) |
 
 ### Database Root Directory
 ```bash
@@ -681,7 +681,7 @@ main.nf
   └─→ Software version collection
 ```
 
-### Illumina Workflow Details
+### Illumina Workflow Execution Flow
 
 ```
 illumina.nf
@@ -709,7 +709,7 @@ illumina.nf
   └─→ Output: clean_reads channel
 ```
 
-### Nanopore Workflow Details
+### Nanopore Workflow Execution Flow
 
 ```
 nanopore.nf
@@ -738,7 +738,7 @@ nanopore.nf
   └─→ Output: clean_reads channel
 ```
 
-### Read-Based Processing Details
+### Read-Based Processing Execution Flow
 
 ```
 read_based_processing.nf
@@ -773,7 +773,7 @@ read_based_processing.nf
       └─→ Batch correction based on blanks
 ```
 
-### Assembly-Based Processing Details
+### Assembly-Based Processing Execution Flow
 
 ```
 assembly_based_processing.nf
@@ -983,6 +983,57 @@ tower {
 
 The workflow integrates the following major tools:
 
+| Program      | Version | Relevant Links                                                                                                                                     |
+| :----------- | :-----: | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BBTools      |  39.81  | [https://bbmap.org/](https://bbmap.org/)                                                                                                           |
+| bit          | 1.13.15 | [https://github.com/AstrobioMike/bioinf_tools#bioinformatics-tools-bit](https://github.com/AstrobioMike/bioinf_tools#bioinformatics-tools-bit)     |
+| bowtie2      |  2.5.5  | [https://bowtie-bio.sourceforge.net/bowtie2/index.shtml](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml)                                   |
+| CAT          |   5.3   | [https://github.com/MGXlab/CAT_pack](https://github.com/MGXlab/CAT_pack)                                                                           |
+| CheckM       |  1.2.5  | [https://github.com/Ecogenomics/CheckM](https://github.com/Ecogenomics/CheckM)                                                                     |
+| fastp        |  1.3.1  | [https://github.com/OpenGene/fastp](https://github.com/OpenGene/fastp)                                                                             |
+| FastQC       | 0.12.1  | [https://www.bioinformatics.babraham.ac.uk/projects/fastqc/](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)                           |
+| GTDB-Tk      |  2.6.1  | [https://github.com/Ecogenomics/GTDBTk](https://github.com/Ecogenomics/GTDBTk)                                                                     |
+| HUMAnN       |   3.9   | [https://github.com/biobakery/humann](https://github.com/biobakery/humann)                                                                         |
+| Kaiju        | 1.10.1  | [https://bioinformatics-centre.github.io/kaiju/](https://bioinformatics-centre.github.io/kaiju/)                                                   |
+| KEGG-Decoder |   1.3   | [https://github.com/bjtully/BioData/tree/master/KEGGDecoder#kegg-decoder](https://github.com/bjtully/BioData/tree/master/KEGGDecoder#kegg-decoder) |
+| KOFamScan    |  1.3.0  | [https://github.com/takaram/kofam_scan#kofamscan](https://github.com/takaram/kofam_scan#kofamscan)                                                 |
+| Kraken2      | 2.17.1  | [https://github.com/DerrickWood/kraken2](https://github.com/DerrickWood/kraken2)                                                                   |
+| KrakenTools  |  1.2.1  | [https://ccb.jhu.edu/software/krakentools/](https://ccb.jhu.edu/software/krakentools/)                                                             |
+| Krona        |  2.8.1  | [https://github.com/marbl/Krona/wiki](https://github.com/marbl/Krona/wiki)                                                                         |
+| MEGAHIT      |  1.2.9  | [https://github.com/voutcn/megahit#megahit](https://github.com/voutcn/megahit#megahit)                                                             |
+| MetaBAT      |  2.18   | [https://bitbucket.org/berkeleylab/metabat/src/master/](https://bitbucket.org/berkeleylab/metabat/src/master/)                                     |
+| MetaPhlAn    |  4.1.0  | [https://github.com/biobakery/MetaPhlAn](https://github.com/biobakery/MetaPhlAn)                                                                   |
+| MultiQC      | 1.27.1  | [https://multiqc.info/](https://multiqc.info/)                                                                                                     |
+| Prodigal     |  2.6.3  | [https://github.com/hyattpd/Prodigal#prodigal](https://github.com/hyattpd/Prodigal#prodigal)                                                       |
+| samtools     | 1.23.1  | [https://github.com/samtools/samtools#samtools](https://github.com/samtools/samtools#samtools)                                                     |
+| SPAdes       |  4.2.0  | [https://github.com/ablab/spades](https://github.com/ablab/spades)                                                                                 |
+| R            |  4.5.3  | [https://www.r-project.org](https://www.r-project.org)                                                                                             |
+| decontam     | 1.30.0  | [https://www.bioconductor.org/packages/release/bioc/html/decontam.html](https://www.bioconductor.org/packages/release/bioc/html/decontam.html)     |
+| dplyr        |  1.2.0  | [https://dplyr.tidyverse.org](https://dplyr.tidyverse.org)                                                                                         |
+| ggplot2      |  4.0.2  | [https://ggplot2.tidyverse.org](https://ggplot2.tidyverse.org)                                                                                     |
+| glue         |  1.8.0  | [https://glue.tidyverse.org](https://glue.tidyverse.org)                                                                                           |
+| htmlwidgets  |  1.6.4  | [http://www.htmlwidgets.org](http://www.htmlwidgets.org)                                                                                           |
+| magrittr     |  2.0.5  | [https://magrittr.tidyverse.org](https://magrittr.tidyverse.org)                                                                                   |
+| pavian       | 1.2.0*  | [https://github.com/fbreitwieser/pavian](https://github.com/fbreitwieser/pavian)                                                                   |
+| pheatmap     | 1.0.13  | [https://cran.r-project.org/package=pheatmap](https://cran.r-project.org/package=pheatmap)                                                         |
+| phyloseq     | 1.54.0  | [https://www.bioconductor.org/packages/release/bioc/html/phyloseq.html](https://www.bioconductor.org/packages/release/bioc/html/phyloseq.html)     |
+| plotly       | 4.12.0  | [https://plotly-r.com](https://plotly-r.com)                                                                                                       |
+| purrr        |  1.2.1  | [https://purrr.tidyverse.org](https://purrr.tidyverse.org)                                                                                         |
+| readr        |  2.2.0  | [https://readr.tidyverse.org](https://readr.tidyverse.org)                                                                                         |
+| scales       |  1.4.0  | [https://scales.r-lib.org](https://scales.r-lib.org)                                                                                               |
+| stringr      |  1.6.0  | [https://stringr.tidyverse.org](https://stringr.tidyverse.org)                                                                                     |
+| tibble       |  3.3.1  | [https://tibble.tidyverse.org](https://tibble.tidyverse.org)                                                                                       |
+| tidyr        |  1.3.2  | [https://tidyr.tidyverse.org](https://tidyr.tidyverse.org)                                                                                         |
+| Dorado       |  1.3.0  | [https://github.com/nanoporetech/dorado](https://github.com/nanoporetech/dorado)                                                                   |
+| Filtlong     |  0.3.1  | [https://github.com/rrwick/Filtlong](https://github.com/rrwick/Filtlong)                                                                           |
+| Flye         |  2.9.6  | [https://github.com/mikolmogorov/Flye](https://github.com/mikolmogorov/Flye)                                                                       |
+| Medaka       |  2.2.0  | [https://github.com/nanoporetech/medaka](https://github.com/nanoporetech/medaka)                                                                   |
+| Minimap2     |  2.30   | [https://github.com/lh3/minimap2](https://github.com/lh3/minimap2)                                                                                 |
+| NanoPlot     | 1.45.2  | [https://github.com/wdecoster/NanoPlot](https://github.com/wdecoster/NanoPlot)                                                                     |
+| Porechop     |  0.2.4  | [https://github.com/rrwick/Porechop](https://github.com/rrwick/Porechop)                                                                           |
+
+> **Note:** pavian R package requires R version 4.0.5
+
 ### Quality Control
 - FastQC
 - MultiQC
@@ -1031,9 +1082,9 @@ If you use this workflow, please cite:
 - Individual tool citations (see `software_versions.txt` in outputs)
 
 ### Pipeline Documents
-- [GL-DPPD-7107-B](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Illumina/Pipeline_GL-DPPD-7107_Versions/GL-DPPD-7107-B.md) : Standard short-read metagenomics
-- [GL-DPPD-7116](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7116_Versions/GL-DPPD-7116.md): Low biomass long-read metagenomics
-- [GL-DPPD-7117](https://github.com/nasa/GeneLab_Data_Processing/blob/DEV_Metagenomics_low_biomass/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions/GL-DPPD-7117.md): Low biomass short-read metagenomics
+- [GL-DPPD-7107-B](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Illumina/Pipeline_GL-DPPD-7107_Versions/GL-DPPD-7107-B.md) : Standard short-read metagenomics
+- [GL-DPPD-7116](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7116_Versions/GL-DPPD-7116.md): Low biomass long-read metagenomics
+- [GL-DPPD-7117](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions/GL-DPPD-7117.md): Low biomass short-read metagenomics
 
 ---
 
@@ -1044,38 +1095,3 @@ If you use this workflow, please cite:
 - **Contact OSDR:** https://science.nasa.gov/biological-physical/data/osdr/osdr-help-contact-us/
 - **Github Issues**: https://github.com/nasa/GeneLab_Metagenomics_Workflow/issues
 
----
-
-## Changelog
-
-### [Version 1.0.0-beta](CHANGELOG.md)
-
-This is the initial beta release of the NF_MetagenomeSeq workflow which is an extension of the previous
-[NF_MGIllumina workflow](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Illumina/Workflow_Documentation/NF_MGIllumina/).
-
-### Added
-- Two additional taxonomic profiling tools to the Read-based processing subworkflow
-  - Kaiju taxonomic profiling
-  - Kraken2 taxonomic profiling
-- Downstream analysis and visualization for both Read-based and Assembly-based processing outputs
-  - Feature filtering for all output datatypes
-  - Barplots or Heatmaps for each output datatype
-- Low biomass metagenomics processing support for both short-read (Illumina) and long-read (Nanopore) data
-  - Implement short-read low biomass pipeline [GL-DPPD-7117](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7117_Versions/GL-DPPD-7117.md)
-  - Implement long-read low biomass pipeline [GL-DPPD-7116](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Low_Biomass/Pipeline_GL-DPPD-7116_Versions/GL-DPPD-7116.md)
-    - Long-read specific pre-processing
-    - Long-read specific steps in the Assembly-based processing subworkflow
-  - Read decontamination/filtering during pre-processing for both short- and long-read data
-  - Feature decontamination using decontam package during downstream analysis for low biomass data
-- Long-read data support for processing standard metagenomics data
-
-### Changed
-- Update to the latest standard short-read pipeline version [GL-DPPD-7107-B](https://github.com/nasa/GeneLab_Data_Processing/blob/master/Metagenomics/Illumina/Pipeline_GL-DPPD-7107_Versions/GL-DPPD-7107-B.md) 
-of the GeneLab Metagenomics consensus processing pipelines.
-- Replace bbduk with fastp for initial read quality filtering and adapter trimming in standard Illumina workflow
-
----
-
-## License
-
-This workflow is developed by NASA GeneLab and is part of the Open Science Data Repository (OSDR) initiative. Please refer to the repository for license information.

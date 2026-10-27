@@ -1,7 +1,7 @@
-# GeneLab Metagenomics Workflow - Quick Reference Guide <!-- omit in toc -->
+# GeneLab NF_MetagenomeSeq Workflow - Quick Reference Guide <!-- omit in toc -->
 
 This is a quick start guide and basic reference for key parameter selection and troubleshooting. 
-For more detailed information, see: [**GeneLab_Metagenomics_Workflow_Documentation.md**](GeneLab_Metagenomics_Workflow_Documentation.md)
+For more detailed information, see: [**GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md**](./GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md)
 
 - [Quick Start Commands](#quick-start-commands)
 - [Input Sample File Templates](#input-sample-file-templates)
@@ -222,7 +222,7 @@ list in the [Kraken2 documentation](https://github.com/DerrickWood/kraken2/wiki/
 ---
 
 ## Key Output File Locations
-For a complete list of output files, see [**GeneLab_Metagenomics_Workflow_Documentation.md**](GeneLab_Metagenomics_Workflow_Documentation.md)
+For a complete list of output files, see [**GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md**](./GeneLab_NF_MetagenomeSeq_Workflow_Documentation.md)
 
 ```
 ../
