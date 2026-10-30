@@ -525,7 +525,7 @@ process SUMMARIZE_MAG_LEVEL_KO_ANNOTATIONS {
                 grep "^>" ${MAGs_dir}/\$MAG.fasta | tr -d ">" > curr-contig-ids.tmp
 
                 parse-MAG-annots.py \\
-                        -i \${sample_ID}-gene-coverage-annotation-and-tax.tsv \\
+                        -i \${sample_ID}-gene-coverage-annotation-and-tax${params.assay_suffix}.tsv \\
                         -w curr-contig-ids.tmp \\
                         -M \$MAG \\
                         -o ${params.additional_filename_prefix}MAG-level-KO-annotations${params.assay_suffix}.tsv
@@ -662,7 +662,7 @@ workflow summarize_mags {
         FILTER_CHECKM_RESULTS_AND_COPY_MAGS(bins_checkm_results_ch, bins_ch) 
         MAGs_checkm_out_ch = FILTER_CHECKM_RESULTS_AND_COPY_MAGS.out.MAGs_checkm_out
         MAGs_dir_ch = FILTER_CHECKM_RESULTS_AND_COPY_MAGS.out.MAGs_dir
-        ZIP_MAGS(Channel.of("MAG"), MAGs_dir_ch)
+        ZIP_MAGS(channel.of("MAG"), MAGs_dir_ch)
 
         
         MAGs_ch = GET_MAGS(MAGs_dir_ch).flatten()
@@ -687,7 +687,7 @@ workflow summarize_mags {
         SUMMARIZE_MAG_KO_ANNOTS_WITH_KEGG_DECODER(MAG_level_KO_annotations_ch, MAGs_dir_ch)
 
         // Capture software versions
-        software_versions_ch = Channel.empty()
+        software_versions_ch = channel.empty()
         ZIP_MAGS.out.version | mix(software_versions_ch) | set{software_versions_ch}
         GTDBTK_ON_MAG.out.version | mix(software_versions_ch) | set{software_versions_ch}
         SUMMARIZE_MAG_ASSEMBLIES.out.version | mix(software_versions_ch) | set{software_versions_ch}
