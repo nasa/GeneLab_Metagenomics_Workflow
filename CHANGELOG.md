@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - output file prefix and suffix support
+- `CAT_FASTQ_DIR` now finds demultiplexed FASTQ files in nested subdirectories and links them into the sample work directory ([#20](https://github.com/nasa/GeneLab_Metagenomics_Workflow/issues/20))
 
 ## [v1.0.0-beta](https://github.com/nasa/GeneLab_Metagenomics_Workflow/releases/tag/v1.0.0-beta/)
 

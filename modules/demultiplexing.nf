@@ -279,7 +279,9 @@ process CAT_FASTQ_DIR {
 
 
     [ -d  \${WORK_DIR}/\${sample}/ ] ||  mkdir -p \${WORK_DIR}/\${sample}/  
-    cp *_\${SAMPLE_TO_BARCODE[\$sample]}*  \${WORK_DIR}/\${sample}/ 
+    find . -name "*_\${SAMPLE_TO_BARCODE[\$sample]}_*" -type f | while read -r file; do
+      cp -s "\$(cd \$(dirname \$file); pwd)/\$(basename \$file)" \${WORK_DIR}/\${sample}/
+    done 
 
     
     if ls -1 \${WORK_DIR}/\${sample}/| head -n1| xargs -I {} gzip -t \${WORK_DIR}/\${sample}/{}  2>/dev/null; then 
