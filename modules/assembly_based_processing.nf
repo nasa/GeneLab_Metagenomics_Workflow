@@ -108,7 +108,9 @@ workflow assembly_based {
             SHORT_MAPPING.out.version | mix(software_versions_ch) | set{software_versions_ch}
             read_mapping_ch = SAM_TO_BAM.out.bam
         }else{
-            LONG_MAPPING(assembly_ch.join(filtered_ch))
+            // For nanopore, extract only the reads (first and second elements of filtered_ch tuple) to match LONG_MAPPING input
+            nanopore_mapping_ch = assembly_ch.join(filtered_ch.map{ sample_id, reads, _isPaired -> [sample_id, reads] })
+            LONG_MAPPING(nanopore_mapping_ch)
             LONG_MAPPING.out.sam | SAM_TO_BAM
             LONG_MAPPING.out.version | mix(software_versions_ch) | set{software_versions_ch}
             read_mapping_ch = SAM_TO_BAM.out.bam
